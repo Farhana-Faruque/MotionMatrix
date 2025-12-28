@@ -20,7 +20,7 @@ Example:
     # Create JWT token
     token = create_access_token({"user_id": 1, "role": "admin"})
 """
-
+import hashlib
 import logging
 import re
 import secrets
@@ -94,7 +94,8 @@ def hash_password(password: str) -> str:
         raise ValueError("Password cannot be empty")
     
     try:
-        hashed = pwd_context.hash(password)
+        sha = hashlib.sha256(password.encode("utf-8")).digest()
+        hashed = pwd_context.hash(sha)
         logger.debug("Password hashed successfully")
         return hashed
     except Exception as e:
@@ -135,7 +136,8 @@ def verify_password(plain_password: str, hashed_password: str) -> bool:
         return False
     
     try:
-        is_valid = pwd_context.verify(plain_password, hashed_password)
+        sha = hashlib.sha256(plain_password.encode("utf-8")).digest()
+        is_valid = pwd_context.verify(sha, hashed_password)
         if is_valid:
             logger.debug("Password verification successful")
         else:
