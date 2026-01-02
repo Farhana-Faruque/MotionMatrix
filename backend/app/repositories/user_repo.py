@@ -15,7 +15,8 @@ Example:
 import logging
 from typing import List, Optional
 from uuid import UUID
-
+from fastapi import Depends
+from backend.app.core.database import get_db
 from sqlalchemy.orm import Session
 from sqlalchemy.exc import SQLAlchemyError
 
@@ -75,7 +76,7 @@ class UserRepository(BaseRepository[User]):
     # Authentication & Lookup Methods
     # ========================================================================
     
-    def get_by_email(self, db: Session, email: str) -> Optional[User]:
+    def get_by_email(self, email: str, db: Session= Depends(get_db)) -> Optional[User]:
         """
         Get user by email address.
         

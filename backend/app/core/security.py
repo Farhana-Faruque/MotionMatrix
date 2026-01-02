@@ -281,7 +281,7 @@ def create_refresh_token(data: dict) -> str:
     Example:
         >>> refresh_token = create_refresh_token({"user_id": 123})
     """
-    expires_delta = timedelta(days=settings.REFRESH_TOKEN_EXPIRE_DAYS)
+    expires_delta = timedelta(days=settings.JWT_REFRESH_TOKEN_EXPIRE_DAYS)
     return create_access_token(data, expires_delta)
 
 

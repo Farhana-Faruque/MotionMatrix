@@ -202,9 +202,9 @@ class TokenPayload(BaseModel):
         """
         # Only validate for new tokens (when creating payload)
         # Decoded tokens might already be expired and that's handled elsewhere
-        if v < datetime.utcnow():
-            # This is informational; actual expiration check happens in JWT decode
-            pass
+        # if v < datetime.utcnow():
+        #     # This is informational; actual expiration check happens in JWT decode
+        #     pass
         return v
     
     @validator("role", pre=True)
