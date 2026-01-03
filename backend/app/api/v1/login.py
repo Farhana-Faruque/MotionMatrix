@@ -1,4 +1,5 @@
 from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy.orm import Session
 from typing import List
 from backend.app.core.config import settings
@@ -12,13 +13,18 @@ router = APIRouter()
 @router.post(
     "/login",
     response_model=Token,
-    status_code=status.HTTP_201_CREATED,
+    status_code=status.HTTP_200_OK,  # Login should be 200, not 201
 )
 def login(
-    user_in: UserLogin,
+    credentials: OAuth2PasswordRequestForm = Depends(),  # Changed from user_in
     db: Session = Depends(get_db),
 ):
     try:
+        # Create a UserLogin object from the form data
+        user_in = UserLogin(
+            email=credentials.username,  # OAuth2 uses 'username', treat it as email
+            password=credentials.password
+        )
         user = auth_service_login(user_in, db)
         return user
     except ValueError as e:
@@ -26,7 +32,6 @@ def login(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail=str(e),
         )
-
 @router.post(
     "/refresh",
     response_model=TokenPayload,

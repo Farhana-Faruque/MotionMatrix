@@ -905,6 +905,16 @@ def validate_enum_value(enum_class: type, value: str) -> bool:
     except:
         return False
 
+#APICHECKPOINT
+
+class APIEndpoint(str, Enum):
+    REGISTER_USER = "register_user"
+    DELETE_USER = "delete_user"
+    UPDATE_USER = "update_user"
+    VIEW_USERS = "view_users"
+    CREATE_POST = "create_post"
+    DELETE_POST = "delete_post"
+
 
 # ============================================================================
 # Module Initialization

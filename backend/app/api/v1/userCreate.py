@@ -1,9 +1,11 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 from backend.app.core.config import settings
+from backend.app.utils.enums import UserRole, APIEndpoint
 from backend.app.core.database import get_db
 from backend.app.schemas.user import UserResponse, UserCreate
 from backend.app.services.user_service import create_user
+from backend.app.services.auth_service import require_authorization
 router = APIRouter()
 
 @router.post(
@@ -14,6 +16,7 @@ router = APIRouter()
 def register(
     user_in: UserCreate,
     db: Session = Depends(get_db),
+   current_user: UserRole = Depends(require_authorization(APIEndpoint.REGISTER_USER)),
 ):
     try:
         user = create_user(db, user_in)
