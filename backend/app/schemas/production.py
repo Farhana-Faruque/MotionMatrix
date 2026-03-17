@@ -2,7 +2,7 @@
 Pydantic schemas for Production operations.
 """
 
-from datetime import date, dt_date
+from datetime import date, datetime
 from typing import Optional
 from uuid import UUID
 
@@ -11,7 +11,7 @@ from pydantic import BaseModel, Field
 
 class ProductionBase(BaseModel):
     worker_id: UUID = Field(..., description="Worker ID")
-    date: dt_date = Field(default_factory=date.today)
+    date: date = Field(default_factory=date.today)
     target_quantity: Optional[int] = None
     achieved_quantity: int = Field(default=0, ge=0)
     defect_quantity: int = Field(default=0, ge=0)
@@ -36,8 +36,8 @@ class ProductionUpdate(BaseModel):
 class ProductionResponse(ProductionBase):
     id: UUID
     recorded_by: Optional[UUID] = None
-    created_at: dt_date
-    updated_at: dt_date
+    created_at: datetime
+    updated_at: datetime
 
     class Config:
         from_attributes = True

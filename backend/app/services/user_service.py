@@ -36,7 +36,7 @@ def create_user(db: Session, user_data:UserCreate)-> UserResponse:
         role=UserRole(new_user.role),
         status=UserStatus(new_user.status),
         created_at=new_user.created_at,
-        is_first_login=False,
+        is_first_login=new_user.is_first_login,
         updated_at=new_user.created_at
     )
     return new_user_response

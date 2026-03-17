@@ -2,10 +2,18 @@
 Pytest fixtures and configuration for the test suite.
 """
 
+import os
 import pytest
 from fastapi.testclient import TestClient
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
+
+os.environ["TESTING"] = "true"
+os.environ["DB_USER"] = "testuser"
+os.environ["DB_PASSWORD"] = "testpassword"
+os.environ["DB_NAME"] = "testdb"
+os.environ["JWT_SECRET_KEY"] = "a-very-long-and-super-secret-key-for-testing"
+
 
 from backend.app.core.database import Base, get_db
 from backend.app.core.config import get_settings

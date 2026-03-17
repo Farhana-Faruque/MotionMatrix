@@ -2,7 +2,7 @@
 Pydantic schemas for Attendance operations.
 """
 
-from datetime import date, dt_date, time
+from datetime import date, time, datetime
 from typing import Optional
 from uuid import UUID
 
@@ -11,7 +11,7 @@ from pydantic import BaseModel, Field
 
 class AttendanceBase(BaseModel):
     worker_id: UUID = Field(..., description="Worker ID")
-    date: dt_date = Field(default_factory=date.today)
+    date: date = Field(default_factory=date.today)
     clock_in: Optional[time] = None
     clock_out: Optional[time] = None
     status: str = Field(default="PRESENT", description="PRESENT, ABSENT, ON_LEAVE, HALF_DAY, LATE")
@@ -32,8 +32,8 @@ class AttendanceUpdate(BaseModel):
 class AttendanceResponse(AttendanceBase):
     id: UUID
     recorded_by: Optional[UUID] = None
-    created_at: dt_date
-    updated_at: dt_date
+    created_at: datetime
+    updated_at: datetime
 
     class Config:
         from_attributes = True

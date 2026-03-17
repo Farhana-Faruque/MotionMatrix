@@ -1,10 +1,4 @@
-"""
-Centralized configuration management using Pydantic Settings.
-
-This module provides a singleton Settings class that loads configuration
-from environment variables with validation and default values.
-"""
-
+import os
 from functools import lru_cache
 from pathlib import Path
 from typing import List, Optional
@@ -38,6 +32,7 @@ class Settings(BaseSettings):
     HOST: str = Field(default="0.0.0.0")
     PORT: int = Field(default=8000)
     TIMEZONE: str = Field(default="UTC")
+    TESTING: bool = Field(default=False)
     # ============================================================================
     # Database Configuration
     # ============================================================================
@@ -267,10 +262,9 @@ class Settings(BaseSettings):
             v.parent.mkdir(parents=True, exist_ok=True)
         return v
 
-    model_config = {
-        "env_file": ENV_FILE,       # where to load environment variables
-        "env_file_encoding": "utf-8"
-    }
+    class Config:
+        env_file = None if os.environ.get("TESTING") else ENV_FILE
+        env_file_encoding = "utf-8"
 
 @lru_cache()
 def get_settings() -> Settings:
