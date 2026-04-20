@@ -1,18 +1,49 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import '../styles/AdminDashboard.css';
+import AdminProfile from './AdminProfile';
 import AddWorker from './AddWorker';
 import ChatBot from './ChatBot';
+import CreateFloor from './CreateFloor';
+import AssignCCTV from './AssignCCTV';
 
 const AdminDashboard = ({ onLogout, adminUser }) => {
   const [activeSection, setActiveSection] = useState('dashboard');
   const [adminData, setAdminData] = useState(adminUser || {
     name: 'Admin User',
     role: 'Administrator',
-    email: 'admin@motionmatrix.com'
+    email: 'admin@motionmatrix.com',
+    department: 'Administration'
   });
+
+  useEffect(() => {
+    if (adminUser) {
+      setAdminData(adminUser);
+    }
+  }, [adminUser]);
 
   const handleLogout = () => {
     onLogout();
+  };
+
+  // Generate initials for avatar
+  const getInitials = (name) => {
+    return name
+      .split(' ')
+      .map(word => word[0])
+      .join('')
+      .toUpperCase()
+      .slice(0, 2);
+  };
+
+  // Dynamic description based on role
+  const getDescription = () => {
+    switch(adminData.role?.toLowerCase()) {
+      case 'admin':
+      case 'administrator':
+        return 'Manage workers, accounts, floors, CCTV systems, and communicate with all team members';
+      default:
+        return 'Manage workers, accounts, and communicate with floor managers';
+    }
   };
 
   return (
@@ -33,10 +64,28 @@ const AdminDashboard = ({ onLogout, adminUser }) => {
             📊 Dashboard
           </button>
           <button
+            className={`menu-item ${activeSection === 'profile' ? 'active' : ''}`}
+            onClick={() => setActiveSection('profile')}
+          >
+            👤 My Profile
+          </button>
+          <button
             className={`menu-item ${activeSection === 'addWorker' ? 'active' : ''}`}
             onClick={() => setActiveSection('addWorker')}
           >
             👷 Add Worker / Account
+          </button>
+          <button
+            className={`menu-item ${activeSection === 'createFloor' ? 'active' : ''}`}
+            onClick={() => setActiveSection('createFloor')}
+          >
+            🏢 Create Floor
+          </button>
+          <button
+            className={`menu-item ${activeSection === 'assignCCTV' ? 'active' : ''}`}
+            onClick={() => setActiveSection('assignCCTV')}
+          >
+            🎥 Assign CCTV
           </button>
           <button
             className={`menu-item ${activeSection === 'chat' ? 'active' : ''}`}
@@ -57,11 +106,16 @@ const AdminDashboard = ({ onLogout, adminUser }) => {
         <header className="dashboard-header">
           <div className="header-info">
             <h1>Welcome, {adminData.name}</h1>
-            <p>Manage workers, accounts, and communicate with floor managers</p>
+            <p>{getDescription()}</p>
           </div>
           <div className="user-profile">
-            <img src="https://via.placeholder.com/40" alt="Profile" className="profile-avatar" />
-            <span>{adminData.email}</span>
+            <div className="profile-avatar-dynamic">
+              {getInitials(adminData.name)}
+            </div>
+            <div className="profile-info">
+              <p className="profile-email">{adminData.email}</p>
+              <p className="profile-role">{adminData.role || 'Administrator'}</p>
+            </div>
           </div>
         </header>
 
@@ -102,28 +156,82 @@ const AdminDashboard = ({ onLogout, adminUser }) => {
                 </div>
               </div>
 
-              <div className="quick-actions">
+              <div className="feature-cards">
                 <h3>Quick Actions</h3>
-                <div className="action-buttons">
-                  <button 
-                    className="action-btn"
-                    onClick={() => setActiveSection('addWorker')}
-                  >
-                    Add Worker / Account
-                  </button>
-                  <button 
-                    className="action-btn"
-                    onClick={() => setActiveSection('chat')}
-                  >
-                    Send Message
-                  </button>
+                <div className="cards-grid">
+                  <div className="feature-card">
+                    <div className="feature-icon">👷</div>
+                    <div className="feature-content">
+                      <h4>Add Worker</h4>
+                      <p>Add new workers and accounts to the system with proper role and department assignments.</p>
+                      <button 
+                        className="feature-btn"
+                        onClick={() => setActiveSection('addWorker')}
+                      >
+                        Add Worker
+                      </button>
+                    </div>
+                  </div>
+
+                  <div className="feature-card">
+                    <div className="feature-icon">🏢</div>
+                    <div className="feature-content">
+                      <h4>Create Floor</h4>
+                      <p>Set up new floors with proper configurations for production management and monitoring.</p>
+                      <button 
+                        className="feature-btn"
+                        onClick={() => setActiveSection('createFloor')}
+                      >
+                        Create Floor
+                      </button>
+                    </div>
+                  </div>
+
+                  <div className="feature-card">
+                    <div className="feature-icon">🎥</div>
+                    <div className="feature-content">
+                      <h4>Assign CCTV</h4>
+                      <p>Configure and assign CCTV cameras to floors for real-time monitoring and security.</p>
+                      <button 
+                        className="feature-btn"
+                        onClick={() => setActiveSection('assignCCTV')}
+                      >
+                        Assign CCTV
+                      </button>
+                    </div>
+                  </div>
+
+                  <div className="feature-card">
+                    <div className="feature-icon">💬</div>
+                    <div className="feature-content">
+                      <h4>Send Message</h4>
+                      <p>Communicate directly with floor managers and workers for important updates and notifications.</p>
+                      <button 
+                        className="feature-btn"
+                        onClick={() => setActiveSection('chat')}
+                      >
+                        Send Message
+                      </button>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
           )}
 
+          {/* Profile Page */}
+          {activeSection === 'profile' && <AdminProfile user={adminData} />}
+
           {/* Add Worker */}
           {activeSection === 'addWorker' && <AddWorker />}
+
+          {/* Create Floor */}
+          {activeSection === 'createFloor' && (
+            <CreateFloor onSelectFloor={(floorId) => setActiveSection('assignCCTV')} />
+          )}
+
+          {/* Assign CCTV */}
+          {activeSection === 'assignCCTV' && <AssignCCTV />}
 
           {/* Chat */}
           {activeSection === 'chat' && <ChatBot />}

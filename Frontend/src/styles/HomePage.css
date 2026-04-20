@@ -10,13 +10,13 @@
 
 .homepage {
   font-family: 'Segoe UI', 'Roboto', sans-serif;
-  background: #FFF5FA;
-  color: #2B0F1E;
+  background: #F5F2ED;
+  color: #1B4332;
 }
 
 /* Hero Section */
 .hero-section {
-  background: linear-gradient(135deg, #8E1F6A 0%, #C74B9B 100%);
+  background: linear-gradient(135deg, #1B4332 0%, #2D5A3D 100%);
   color: white;
   padding: 80px 20px;
   display: flex;
@@ -85,13 +85,15 @@
 }
 
 .btn-primary {
-  background: white;
-  color: #9B2C6B;
+  background: #1B4332;
+  color: white;
 }
 
 .btn-primary:hover {
+  background: #2D5A3D;
+  color: white;
   transform: translateY(-2px);
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 8px 20px rgba(27, 67, 50, 0.2);
 }
 
 .btn-secondary {
@@ -164,7 +166,7 @@
   text-align: center;
   font-size: 2.5rem;
   margin-bottom: 50px;
-  color: #333;
+  color: #1B4332;
 }
 
 .features-grid {
@@ -174,17 +176,18 @@
 }
 
 .feature-card {
-  background: white;
+  background: #FFFFFF;
   padding: 30px;
   border-radius: 12px;
   text-align: center;
   transition: all 0.3s ease;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
 }
 
 .feature-card:hover {
   transform: translateY(-10px);
-  box-shadow: 0 12px 30px rgba(102, 126, 234, 0.15);
+  box-shadow: 0 12px 30px rgba(27, 67, 50, 0.15);
+  background: #FFFFFF;
 }
 
 .feature-icon {
@@ -195,7 +198,7 @@
 .feature-card h3 {
   font-size: 1.3rem;
   margin-bottom: 12px;
-  color: #8E1F6A;
+  color: #1B4332;
 }
 
 .feature-card p {
@@ -205,7 +208,7 @@
 
 /* Exciting Features */
 .exciting-features {
-  background: linear-gradient(135deg, #8E1F6A 0%, #C74B9B 100%);
+  background: linear-gradient(135deg, #1B4332 0%, #2D5A3D 100%);
   color: white;
   padding: 80px 20px;
 }
@@ -251,14 +254,14 @@
 /* Value Section */
 .value-section {
   padding: 80px 20px;
-  background: #FFF5FA;
+  background: #F5F2ED;
 }
 
 .value-section h2 {
   text-align: center;
   font-size: 2.5rem;
   margin-bottom: 50px;
-  color: #333;
+  color: #1B4332;
 }
 
 .value-grid {
@@ -270,16 +273,16 @@
 }
 
 .value-item {
-  background: white;
+  background: #FFFFFF;
   padding: 30px;
   border-radius: 12px;
   text-align: center;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
 }
 
 .value-item h4 {
   font-size: 1.2rem;
-  color: #8E1F6A;
+  color: #1B4332;
   margin-bottom: 12px;
 }
 
@@ -290,7 +293,7 @@
 
 /* CTA Section */
 .cta-section {
-  background: linear-gradient(120deg, #8E1F6A 0%, #C74B9B 100%);
+  background: linear-gradient(120deg, #1B4332 0%, #2D5A3D 100%);
   color: white;
   padding: 80px 20px;
   text-align: center;
@@ -309,10 +312,12 @@
 
 .cta-section .btn-large {
   background: white;
-  color: #8E1F6A;
+  color: #1B4332;
 }
 
 .cta-section .btn-large:hover {
+  background: #D97706;
+  color: white;
   transform: translateY(-3px);
   box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
 }

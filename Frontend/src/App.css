@@ -49,9 +49,9 @@ body {
 
 /* Navigation Bar */
 .navbar {
-  background: linear-gradient(135deg, #8E1F6A 0%, #C74B9B 100%);
+  background: linear-gradient(135deg, #1B4332 0%, #2D5A3D 100%);
   padding: 15px 0;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
   position: sticky;
   top: 0;
   z-index: 1000;
@@ -114,9 +114,30 @@ body {
   transform: translateY(-2px);
 }
 
+.nav-back-btn {
+  background: rgba(16, 185, 129, 0.9);
+  color: white;
+  border: 2px solid rgba(16, 185, 129, 0.5);
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.nav-back-btn:hover {
+  background: rgba(16, 185, 129, 1);
+  border-color: white;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.4);
+}
+
+.nav-back-btn:active {
+  transform: translateY(0);
+}
+
 .nav-register-btn {
-  background: white;
-  color: #0D9488;
+  background: #1B4332;
+  color: white;
   border: 2px solid white;
 }
 
@@ -135,9 +156,15 @@ body {
     font-size: 1.2rem;
   }
 
-  .nav-login-btn {
-    padding: 6px 15px;
-    font-size: 0.85rem;
+  .nav-buttons {
+    gap: 8px;
+  }
+
+  .nav-login-btn,
+  .nav-back-btn,
+  .nav-register-btn {
+    padding: 6px 12px;
+    font-size: 0.75rem;
   }
 }
 
@@ -147,25 +174,25 @@ body {
 }
 
 ::-webkit-scrollbar-track {
-  background: #f1f1f1;
+  background: #F5F2ED;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #8E1F6A;
+  background: #1B4332;
   border-radius: 5px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #8E1F6A;
+  background: #D97706;
 }
 
 /* Selection Styling */
 ::selection {
-  background: #8E1F6A;
+  background: #1B4332;
   color: white;
 }
 
 ::-moz-selection {
-  background: #8E1F6A;
+  background: #1B4332;
   color: white;
 }

@@ -7,7 +7,7 @@
 }
 
 .add-account-container .form-wrapper {
-  background: white;
+  background: #FFFFFF;
   padding: 40px;
   border-radius: 12px;
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
@@ -16,7 +16,7 @@
 
 .add-account-container .form-wrapper h2 {
   font-size: 1.8rem;
-  color: #333;
+  color: #1B4332;
   margin-bottom: 10px;
   font-weight: 700;
 }
@@ -56,7 +56,7 @@
 
 .account-form .form-group label {
   font-weight: 600;
-  color: #333;
+  color: #1B4332;
   margin-bottom: 8px;
   font-size: 0.9rem;
 }
@@ -64,20 +64,21 @@
 .account-form .form-group input,
 .account-form .form-group select {
   padding: 12px 15px;
-  border: 2px solid #e0e0e0;
+  border: 2px solid #D8E2DC;
   border-radius: 8px;
   font-size: 0.95rem;
   transition: all 0.3s ease;
   font-family: inherit;
-  background-color: #f9f9f9;
+  background-color: #FFFFFF;
+  color: #1B4332;
 }
 
 .account-form .form-group input:focus,
 .account-form .form-group select:focus {
   outline: none;
-  border-color: #8E1F6A;
-  box-shadow: 0 0 0 4px rgba(142, 31, 106, 0.1);
-  background-color: white;
+  border-color: #1B4332;
+  box-shadow: 0 0 0 4px rgba(27, 67, 50, 0.1);
+  background-color: #FFFFFF;
 }
 
 .account-form .form-group input.input-error,
@@ -113,11 +114,11 @@
   align-items: center;
   justify-content: center;
   transition: all 0.2s ease;
-  color: #666;
+  color: #999;
 }
 
 .password-toggle:hover {
-  color: #8E1F6A;
+  color: #1B4332;
   transform: scale(1.1);
 }
 
@@ -132,7 +133,7 @@
 }
 
 .account-form .btn-submit {
-  background: linear-gradient(135deg, #8E1F6A 0%, #C74B9B 100%);
+  background: linear-gradient(135deg, #1B4332 0%, #1B4332 100%);
   color: white;
   border: none;
   padding: 14px 30px;
@@ -147,7 +148,7 @@
 
 .account-form .btn-submit:hover {
   transform: translateY(-2px);
-  box-shadow: 0 5px 15px rgba(142, 31, 106, 0.3);
+  box-shadow: 0 5px 15px rgba(27, 67, 50, 0.3);
 }
 
 .account-form .btn-submit:active {

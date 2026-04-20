@@ -10,7 +10,7 @@
 
 .login-page {
   font-family: 'Segoe UI', 'Roboto', sans-serif;
-  background: linear-gradient(135deg, #8E1F6A 0%, #C74B9B 100%);
+  background: linear-gradient(135deg, #F5F2ED 0%, #FFFFFF 100%);
   min-height: 100vh;
   display: flex;
   align-items: center;
@@ -27,16 +27,16 @@
 }
 
 .login-box {
-  background: white;
+  background: #FFFFFF;
   padding: 50px 60px;
   border-radius: 16px;
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.1);
 }
 
 .back-btn {
   background: transparent;
-  color: #8E1F6A;
-  border: 2px solid #e0e0e0;
+  color: #1B4332;
+  border: 2px solid #D8E2DC;
   padding: 10px 16px;
   border-radius: 8px;
   cursor: pointer;
@@ -50,11 +50,11 @@
 }
 
 .back-btn:hover {
-  background: #f8f9ff;
-  border-color: #8E1F6A;
-  color: #8E1F6A;
+  background: #1B4332;
+  border-color: #1B4332;
+  color: white;
   transform: translateX(-3px);
-  box-shadow: 0 4px 12px rgba(142, 31, 106, 0.15);
+  box-shadow: 0 4px 12px rgba(27, 67, 50, 0.15);
 }
 
 .back-btn:active {
@@ -82,7 +82,7 @@
 .login-title {
   text-align: center;
   font-size: 2.5rem;
-  color: #8E1F6A;
+  color: #1B4332;
   margin-bottom: 8px;
   font-weight: 700;
 }
@@ -123,7 +123,7 @@
 }
 
 .recovery-form h2 {
-  color: #0D9488;
+  color: #1B4332;
   font-size: 1.5rem;
   margin-bottom: 10px;
 }
@@ -142,26 +142,27 @@
 
 .form-group label {
   font-weight: 600;
-  color: #333;
+  color: #1B4332;
   margin-bottom: 8px;
   font-size: 0.95rem;
 }
 
 .form-group input {
   padding: 12px 15px;
-  border: 2px solid #e0e0e0;
+  border: 2px solid #D8E2DC;
   border-radius: 8px;
-  font-size: 1rem;
+  font-size: 0.95rem;
   transition: all 0.3s ease;
   font-family: inherit;
-  background-color: #f9f9f9;
+  background-color: #FFFFFF;
+  color: #1B4332;
 }
 
 .form-group input:focus {
   outline: none;
-  border-color: #8E1F6A;
-  box-shadow: 0 0 0 4px rgba(142, 31, 106, 0.1);
-  background-color: white;
+  border-color: #1B4332;
+  box-shadow: 0 0 0 4px rgba(27, 67, 50, 0.1);
+  background-color: #FFFFFF;
 }
 
 .form-group input.input-error {
@@ -180,22 +181,22 @@
 
 .btn-login {
   padding: 12px 15px;
-  background: linear-gradient(135deg, #8E1F6A 0%, #C74B9B 100%);
+  background: linear-gradient(135deg, #1B4332 0%, #1B4332 100%);
   color: white;
   border: none;
   border-radius: 8px;
-  font-size: 1rem;
+  font-size: 0.95rem;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.3s ease;
   margin-top: 10px;
   letter-spacing: 0.5px;
-  box-shadow: 0 4px 15px rgba(142, 31, 106, 0.2);
+  box-shadow: 0 4px 15px rgba(27, 67, 50, 0.2);
 }
 
 .btn-login:hover {
   transform: translateY(-3px);
-  box-shadow: 0 12px 30px rgba(142, 31, 106, 0.4);
+  box-shadow: 0 12px 30px rgba(27, 67, 50, 0.4);
 }
 
 .btn-login:active {
@@ -209,7 +210,7 @@
 
 .forgot-password,
 .back-to-login {
-  color: #8E1F6A;
+  color: #1B4332;
   cursor: pointer;
   font-size: 0.95rem;
   transition: all 0.2s ease;
@@ -217,7 +218,7 @@
 
 .forgot-password:hover,
 .back-to-login:hover {
-  color: #8E1F6A;
+  color: #D97706;
   text-decoration: underline;
 }
 
@@ -228,14 +229,14 @@
 }
 
 .register-link {
-  color: #8E1F6A;
+  color: #1B4332;
   cursor: pointer;
   font-weight: 600;
   transition: all 0.2s ease;
 }
 
 .register-link:hover {
-  color: #8E1F6A;
+  color: #D97706;
   text-decoration: underline;
 }
 
@@ -281,11 +282,11 @@
   align-items: center;
   justify-content: center;
   transition: all 0.2s ease;
-  color: #666;
+  color: #999;
 }
 
 .password-toggle:hover {
-  color: #8E1F6A;
+  color: #1B4332;
   transform: scale(1.1);
 }
 

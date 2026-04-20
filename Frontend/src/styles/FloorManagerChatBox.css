@@ -1,0 +1,282 @@
+/* Floor Manager ChatBox Styles */
+
+.fm-chatbox-page {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.fm-chat-container {
+  display: grid;
+  grid-template-columns: 280px 1fr;
+  gap: 20px;
+  background: white;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  min-height: 600px;
+}
+
+/* Users Sidebar */
+.fm-users-sidebar {
+  background: #F5F2ED;
+  padding: 20px;
+  border-right: 1px solid #D8E2DC;
+  overflow-y: auto;
+}
+
+.fm-users-sidebar h3 {
+  color: #1B4332;
+  margin: 0 0 15px 0;
+  font-size: 1.1rem;
+  font-weight: 600;
+}
+
+.fm-users-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.fm-user-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px;
+  background: white;
+  border: none;
+  border-left: 4px solid #D8E2DC;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-align: left;
+}
+
+.fm-user-item:hover {
+  background: #EFEFEF;
+}
+
+.fm-user-item.active {
+  background: #E8F5E9;
+  border-left-color: #1B4332;
+}
+
+.fm-user-icon {
+  font-size: 1.5rem;
+  min-width: 30px;
+  text-align: center;
+}
+
+.fm-user-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.fm-user-name {
+  color: #1B4332;
+  margin: 0 0 2px 0;
+  font-size: 0.85rem;
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.fm-user-role {
+  color: #999;
+  margin: 0;
+  font-size: 0.75rem;
+  text-transform: capitalize;
+}
+
+/* Chat Area */
+.fm-chat-area {
+  display: flex;
+  flex-direction: column;
+  padding: 20px;
+  position: relative;
+}
+
+.fm-chat-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding-bottom: 15px;
+  border-bottom: 2px solid #D8E2DC;
+  margin-bottom: 15px;
+}
+
+.fm-header-icon {
+  font-size: 1.8rem;
+}
+
+.fm-header-info h3 {
+  color: #1B4332;
+  margin: 0 0 2px 0;
+  font-size: 1.1rem;
+}
+
+.fm-header-info p {
+  color: #999;
+  margin: 0;
+  font-size: 0.85rem;
+}
+
+/* Messages Area */
+.fm-messages {
+  flex: 1;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 15px;
+  min-height: 300px;
+}
+
+.fm-empty-chat {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  color: #999;
+  text-align: center;
+}
+
+.fm-message {
+  display: flex;
+  gap: 10px;
+  animation: messageSlideIn 0.3s ease-out;
+}
+
+@keyframes messageSlideIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.fm-message.sent {
+  justify-content: flex-end;
+}
+
+.fm-message.received {
+  justify-content: flex-start;
+}
+
+.fm-message-icon {
+  font-size: 1.2rem;
+  min-width: 30px;
+  text-align: center;
+}
+
+.fm-message-content {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  max-width: 70%;
+}
+
+.fm-message.sent .fm-message-content {
+  align-items: flex-end;
+}
+
+.fm-message-sender {
+  color: #999;
+  margin: 0;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.fm-message-bubble {
+  background: linear-gradient(135deg, #1B4332 0%, #2D5A3D 100%);
+  color: white;
+  padding: 10px 14px;
+  border-radius: 8px;
+  word-wrap: break-word;
+  line-height: 1.4;
+  font-size: 0.9rem;
+}
+
+.fm-message.received .fm-message-bubble {
+  background: #F5F2ED;
+  color: #1B4332;
+}
+
+.fm-message-time {
+  font-size: 0.7rem;
+  color: #999;
+}
+
+/* Input Area */
+.fm-input-area {
+  display: flex;
+  gap: 10px;
+  align-items: flex-end;
+}
+
+.fm-input-field {
+  flex: 1;
+  padding: 12px 14px;
+  border: 2px solid #D8E2DC;
+  border-radius: 8px;
+  font-size: 0.95rem;
+  font-family: inherit;
+  resize: none;
+  max-height: 120px;
+  transition: all 0.3s ease;
+}
+
+.fm-input-field:focus {
+  outline: none;
+  border-color: #1B4332;
+  box-shadow: 0 0 0 4px rgba(27, 67, 50, 0.1);
+}
+
+.fm-send-btn {
+  padding: 12px 20px;
+  background: linear-gradient(135deg, #1B4332 0%, #2D5A3D 100%);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 0.9rem;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 12px rgba(27, 67, 50, 0.2);
+  min-width: 70px;
+}
+
+.fm-send-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 15px rgba(27, 67, 50, 0.3);
+}
+
+.fm-send-btn:active {
+  transform: translateY(0);
+}
+
+/* Responsive */
+@media (max-width: 1024px) {
+  .fm-chat-container {
+    grid-template-columns: 1fr;
+    min-height: 500px;
+  }
+
+  .fm-users-sidebar {
+    display: none;
+  }
+}
+
+@media (max-width: 768px) {
+  .fm-chat-container {
+    min-height: 400px;
+  }
+
+  .fm-message-content {
+    max-width: 85%;
+  }
+}

@@ -1,0 +1,336 @@
+/* Create Floor Styles */
+
+.create-floor-container {
+  padding: 30px;
+  background: #F5F2ED;
+  min-height: calc(100vh - 200px);
+}
+
+.floor-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 30px;
+}
+
+.floor-header h2 {
+  color: #1B4332;
+  font-size: 2rem;
+  margin: 0;
+}
+
+.btn-add-floor {
+  background: linear-gradient(135deg, #1B4332 0%, #2D5A3D 100%);
+  color: white;
+  border: none;
+  padding: 12px 24px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: all 0.3s ease;
+  font-size: 0.95rem;
+}
+
+.btn-add-floor:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 5px 15px rgba(27, 67, 50, 0.3);
+}
+
+/* Floor Form */
+.floor-form-wrapper {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.floor-form {
+  background: #FFFFFF;
+  padding: 30px;
+  border-radius: 12px;
+  max-width: 500px;
+  width: 90%;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+}
+
+.floor-form h3 {
+  color: #1B4332;
+  margin-top: 0;
+  margin-bottom: 20px;
+  font-size: 1.5rem;
+}
+
+.floor-form .form-group {
+  margin-bottom: 20px;
+}
+
+.floor-form .form-group label {
+  display: block;
+  color: #1B4332;
+  font-weight: 600;
+  margin-bottom: 8px;
+  font-size: 0.9rem;
+}
+
+.floor-form .form-group input {
+  width: 100%;
+  padding: 12px;
+  border: 2px solid #D8E2DC;
+  border-radius: 8px;
+  font-size: 0.95rem;
+  color: #1B4332;
+  font-family: inherit;
+  box-sizing: border-box;
+  transition: all 0.3s ease;
+}
+
+.floor-form .form-group input:focus {
+  outline: none;
+  border-color: #1B4332;
+  box-shadow: 0 0 0 4px rgba(27, 67, 50, 0.1);
+}
+
+.form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 15px;
+}
+
+.form-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 25px;
+}
+
+.btn-submit,
+.btn-cancel {
+  flex: 1;
+  padding: 12px;
+  border: none;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-size: 0.95rem;
+}
+
+.btn-submit {
+  background: linear-gradient(135deg, #1B4332 0%, #2D5A3D 100%);
+  color: white;
+}
+
+.btn-submit:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 5px 15px rgba(27, 67, 50, 0.3);
+}
+
+.btn-cancel {
+  background: #D8E2DC;
+  color: #1B4332;
+}
+
+.btn-cancel:hover {
+  background: #CBD8D0;
+}
+
+/* Floors List */
+.floors-list {
+  margin-top: 30px;
+}
+
+.floors-list h3 {
+  color: #1B4332;
+  font-size: 1.3rem;
+  margin-bottom: 20px;
+}
+
+.no-floors-message {
+  background: #FFFFFF;
+  padding: 40px;
+  border-radius: 12px;
+  text-align: center;
+  color: #999;
+  border: 2px dashed #D8E2DC;
+}
+
+.no-floors-message p {
+  margin: 0;
+  font-size: 1rem;
+}
+
+/* Floors Grid */
+.floors-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 20px;
+}
+
+.floor-card {
+  background: #FFFFFF;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  overflow: hidden;
+  transition: all 0.3s ease;
+  border-left: 4px solid #1B4332;
+}
+
+.floor-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 20px rgba(27, 67, 50, 0.12);
+}
+
+.floor-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  padding: 20px;
+  background: linear-gradient(135deg, #F5F2ED 0%, #FFFFFF 100%);
+  border-bottom: 1px solid #D8E2DC;
+}
+
+.floor-info h4 {
+  color: #1B4332;
+  margin: 0 0 5px 0;
+  font-size: 1.2rem;
+}
+
+.floor-level {
+  color: #999;
+  font-size: 0.85rem;
+  margin: 0;
+}
+
+.status-badge {
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+.status-badge.active {
+  background: rgba(16, 185, 129, 0.1);
+  color: #10B981;
+}
+
+.status-badge.inactive {
+  background: rgba(153, 153, 153, 0.1);
+  color: #999;
+}
+
+.floor-card-body {
+  padding: 20px;
+}
+
+.floor-detail {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.floor-detail .label {
+  color: #999;
+  font-size: 0.85rem;
+}
+
+.floor-detail .value {
+  color: #1B4332;
+  font-weight: 600;
+}
+
+.badge-info {
+  background: rgba(27, 67, 50, 0.1);
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 0.85rem;
+  color: #1B4332;
+}
+
+.floor-card-footer {
+  padding: 15px 20px;
+  display: flex;
+  gap: 10px;
+  background: #F5F2ED;
+  border-top: 1px solid #D8E2DC;
+}
+
+.btn-assign-cctv,
+.btn-edit,
+.btn-delete {
+  flex: 1;
+  padding: 10px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 0.85rem;
+  transition: all 0.3s ease;
+}
+
+.btn-assign-cctv {
+  background: #1B4332;
+  color: white;
+}
+
+.btn-assign-cctv:hover {
+  background: #2D5A3D;
+}
+
+.btn-edit {
+  background: #D97706;
+  color: white;
+}
+
+.btn-edit:hover {
+  background: #C8670E;
+}
+
+.btn-delete {
+  background: #EF4444;
+  color: white;
+}
+
+.btn-delete:hover {
+  background: #DC2626;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .create-floor-container {
+    padding: 20px;
+  }
+
+  .floor-header {
+    flex-direction: column;
+    gap: 15px;
+    align-items: stretch;
+  }
+
+  .btn-add-floor {
+    width: 100%;
+  }
+
+  .floors-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .form-row {
+    grid-template-columns: 1fr;
+  }
+
+  .floor-card-footer {
+    flex-wrap: wrap;
+  }
+
+  .btn-assign-cctv,
+  .btn-edit,
+  .btn-delete {
+    min-width: 0;
+  }
+}

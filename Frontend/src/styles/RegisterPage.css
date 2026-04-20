@@ -10,7 +10,7 @@
 
 .register-page {
   font-family: 'Segoe UI', 'Roboto', sans-serif;
-  background: linear-gradient(135deg, #8E1F6A 0%, #C74B9B 100%);
+  background: linear-gradient(135deg, #F5F2ED 0%, #FFFFFF 100%);
   min-height: 100vh;
   display: flex;
   align-items: center;
@@ -28,17 +28,17 @@
 }
 
 .register-box {
-  background: white;
+  background: #FFFFFF;
   padding: 50px 60px;
   border-radius: 16px;
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.1);
   position: relative;
 }
 
 .back-btn {
   background: transparent;
-  color: #8E1F6A;
-  border: 2px solid #e0e0e0;
+  color: #1B4332;
+  border: 2px solid #D8E2DC;
   padding: 10px 16px;
   border-radius: 8px;
   cursor: pointer;
@@ -52,11 +52,11 @@
 }
 
 .back-btn:hover {
-  background: #f8f9ff;
-  border-color: #8E1F6A;
-  color: #8E1F6A;
+  background: #1B4332;
+  border-color: #1B4332;
+  color: white;
   transform: translateX(-3px);
-  box-shadow: 0 4px 12px rgba(142, 31, 106, 0.15);
+  box-shadow: 0 4px 12px rgba(27, 67, 50, 0.15);
 }
 
 .back-btn:active {
@@ -84,7 +84,7 @@
 .register-title {
   text-align: center;
   font-size: 2rem;
-  color: #8E1F6A;
+  color: #1B4332;
   margin-bottom: 5px;
   font-weight: 700;
   margin-top: 20px;
@@ -121,7 +121,7 @@
 
 .form-group label {
   font-weight: 600;
-  color: #333;
+  color: #1B4332;
   margin-bottom: 6px;
   font-size: 0.9rem;
 }
@@ -129,20 +129,21 @@
 .form-group input,
 .form-group select {
   padding: 10px 12px;
-  border: 2px solid #e0e0e0;
+  border: 2px solid #D8E2DC;
   border-radius: 8px;
   font-size: 0.95rem;
   transition: all 0.3s ease;
   font-family: inherit;
-  background-color: #f9f9f9;
+  background-color: #FFFFFF;
+  color: #1B4332;
 }
 
 .form-group input:focus,
 .form-group select:focus {
   outline: none;
-  border-color: #8E1F6A;
-  box-shadow: 0 0 0 4px rgba(142, 31, 106, 0.1);
-  background-color: white;
+  border-color: #1B4332;
+  box-shadow: 0 0 0 4px rgba(27, 67, 50, 0.1);
+  background-color: #FFFFFF;
 }
 
 .form-group input.input-error,
@@ -177,19 +178,19 @@
   gap: 8px;
   cursor: pointer;
   font-weight: 500;
-  color: #333;
+  color: #1B4332;
 }
 
 .radio-label input[type="radio"] {
   cursor: pointer;
   width: 18px;
   height: 18px;
-  accent-color: #8E1F6A;
+  accent-color: #1B4332;
 }
 
 .btn-register {
   padding: 12px 15px;
-  background: linear-gradient(135deg, #8E1F6A 0%, #C74B9B 100%);
+  background: linear-gradient(135deg, #1B4332 0%, #1B4332 100%);
   color: white;
   border: none;
   border-radius: 8px;
@@ -199,12 +200,12 @@
   transition: all 0.3s ease;
   margin-top: 10px;
   letter-spacing: 0.5px;
-  box-shadow: 0 4px 15px rgba(142, 31, 106, 0.2);
+  box-shadow: 0 4px 15px rgba(27, 67, 50, 0.2);
 }
 
 .btn-register:hover {
   transform: translateY(-3px);
-  box-shadow: 0 12px 30px rgba(142, 31, 106, 0.4);
+  box-shadow: 0 12px 30px rgba(27, 67, 50, 0.4);
 }
 
 .btn-register:active {
@@ -222,14 +223,14 @@
 }
 
 .login-link {
-  color: #8E1F6A;
+  color: #1B4332;
   cursor: pointer;
   font-weight: 600;
   transition: all 0.2s ease;
 }
 
 .login-link:hover {
-  color: #8E1F6A;
+  color: #D97706;
   text-decoration: underline;
 }
 
@@ -303,11 +304,11 @@
   align-items: center;
   justify-content: center;
   transition: all 0.2s ease;
-  color: #666;
+  color: #999;
 }
 
 .password-toggle:hover {
-  color: #0D9488;
+  color: #1B4332;
   transform: scale(1.1);
 }
 
