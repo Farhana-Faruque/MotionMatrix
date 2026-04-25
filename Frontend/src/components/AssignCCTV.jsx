@@ -20,7 +20,7 @@ const AssignCCTV = ({ selectedFloorId }) => {
 
   useEffect(() => {
     if (selectedFloor) {
-      fetchCCTVsByFloor();
+      fetchAllCCTVs();
     }
   }, [selectedFloor]);
 
@@ -50,10 +50,10 @@ const AssignCCTV = ({ selectedFloorId }) => {
     }
   };
 
-  const fetchCCTVsByFloor = async () => {
+  const fetchAllCCTVs = async () => {
     try {
       const token = localStorage.getItem('authToken');
-      const response = await fetch(`http://localhost:5000/api/cctvs/floor/${selectedFloor}`, {
+      const response = await fetch('http://localhost:5000/api/cctvs', {
         headers: {
           'Authorization': `Bearer ${token}`
         }
@@ -105,8 +105,7 @@ const AssignCCTV = ({ selectedFloorId }) => {
       });
 
       if (response.ok) {
-        const data = await response.json();
-        await fetchCCTVsByFloor();
+        await fetchAllCCTVs();
         setCCTVFormData({ name: '', location: '', ipAddress: '' });
         setShowAddCCTVForm(false);
         alert('CCTV added successfully');
@@ -132,7 +131,7 @@ const AssignCCTV = ({ selectedFloorId }) => {
       });
 
       if (response.ok) {
-        await fetchCCTVsByFloor();
+        await fetchAllCCTVs();
       }
     } catch (err) {
       console.error('Error assigning CCTV:', err);
@@ -151,7 +150,7 @@ const AssignCCTV = ({ selectedFloorId }) => {
       });
 
       if (response.ok) {
-        await fetchCCTVsByFloor();
+        await fetchAllCCTVs();
       }
     } catch (err) {
       console.error('Error unassigning CCTV:', err);
@@ -208,6 +207,10 @@ const AssignCCTV = ({ selectedFloorId }) => {
                 <div className="stat">
                   <span className="stat-label">Assigned CCTVs:</span>
                   <span className="stat-value badge">{floorCCTVs.length}</span>
+                </div>
+                <div className="stat">
+                  <span className="stat-label">Total Camera Pool:</span>
+                  <span className="stat-value badge">{cctvs.length}</span>
                 </div>
               </div>
             </div>

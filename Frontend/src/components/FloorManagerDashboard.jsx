@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import '../styles/FloorManagerDashboard.css';
 import NotificationBar from './NotificationBar';
 import FloorManagerProfile from './FloorManagerProfile';
@@ -10,7 +10,95 @@ import WorkersProfilePage from './WorkersProfilePage';
 
 export default function FloorManagerDashboard({ user }) {
   const [activeSection, setActiveSection] = useState('dashboard');
-  const [unreadNotifications, setUnreadNotifications] = useState(2);
+  const [unreadNotifications, setUnreadNotifications] = useState(0);
+  const [dashboardStats, setDashboardStats] = useState({
+    presentWorkers: 0,
+    producedToday: 0,
+    pendingOvertime: 0,
+    qualityRate: 0,
+    efficiency: 0,
+    loading: true,
+    error: ''
+  });
+
+  useEffect(() => {
+    if (activeSection !== 'dashboard') {
+      return;
+    }
+
+    const fetchDashboardStats = async () => {
+      if (!user?.assignedFloorId) {
+        setDashboardStats(prev => ({ ...prev, loading: false, error: 'No floor assigned' }));
+        return;
+      }
+
+      try {
+        setDashboardStats(prev => ({ ...prev, loading: true, error: '' }));
+        const token = localStorage.getItem('authToken');
+        const headers = {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        };
+
+        const today = new Date();
+        const todayStart = new Date(today);
+        todayStart.setHours(0, 0, 0, 0);
+        const todayEnd = new Date(today);
+        todayEnd.setHours(23, 59, 59, 999);
+
+        const [attendanceRes, overtimeRes, productionRes] = await Promise.all([
+          fetch(`http://localhost:5000/api/users/attendance/floor/${user.assignedFloorId}/summary`, { headers }),
+          fetch(`http://localhost:5000/api/overtime/floor-manager/requests`, { headers }),
+          fetch(`http://localhost:5000/api/production-records/report/date-range?startDate=${todayStart.toISOString()}&endDate=${todayEnd.toISOString()}&floorId=${user.assignedFloorId}`, { headers })
+        ]);
+
+        let presentWorkers = 0;
+        let totalHours = 0;
+        if (attendanceRes.ok) {
+          const attendanceData = await attendanceRes.json();
+          presentWorkers = attendanceData.totals?.present || 0;
+          totalHours = attendanceData.totals?.totalHours || 0;
+        }
+
+        let pendingOvertime = 0;
+        if (overtimeRes.ok) {
+          const overtimeData = await overtimeRes.json();
+          const requests = overtimeData.overtimeRequests || [];
+          pendingOvertime = requests.filter(request => request.status === 'pending').length;
+        }
+
+        let producedToday = 0;
+        let qualityRate = 0;
+        let efficiency = 0;
+        if (productionRes.ok) {
+          const productionData = await productionRes.json();
+          producedToday = productionData.summary?.totalProduced || 0;
+          qualityRate = productionData.summary?.avgQualityRate || 0;
+          efficiency = productionData.summary?.overallEfficiency || 0;
+        }
+
+        setDashboardStats({
+          presentWorkers,
+          producedToday,
+          pendingOvertime,
+          qualityRate,
+          efficiency,
+          totalHours,
+          loading: false,
+          error: ''
+        });
+      } catch (error) {
+        console.error('Error fetching floor manager dashboard stats:', error);
+        setDashboardStats(prev => ({
+          ...prev,
+          loading: false,
+          error: 'Failed to load live dashboard metrics'
+        }));
+      }
+    };
+
+    fetchDashboardStats();
+  }, [activeSection, user?.assignedFloorId]);
 
   return (
     <div className="floor-manager-dashboard">
@@ -65,6 +153,12 @@ export default function FloorManagerDashboard({ user }) {
           >
             👥 Workers Profile
           </button>
+          <button
+            className="fm-menu-item fm-logout-btn"
+            onClick={() => window.location.href = '/'}
+          >
+            🚪 Logout
+          </button>
         </nav>
       </aside>
 
@@ -89,32 +183,38 @@ export default function FloorManagerDashboard({ user }) {
               <div className="fm-stat-card">
                 <div className="fm-stat-icon">👷</div>
                 <div className="fm-stat-info">
-                  <h3>Workers Today</h3>
-                  <p className="fm-stat-value">15</p>
+                  <h3>Present Workers Today</h3>
+                  <p className="fm-stat-value">{dashboardStats.loading ? '...' : dashboardStats.presentWorkers}</p>
                 </div>
               </div>
               <div className="fm-stat-card">
                 <div className="fm-stat-icon">📦</div>
                 <div className="fm-stat-info">
                   <h3>Produced Today</h3>
-                  <p className="fm-stat-value">450 units</p>
+                  <p className="fm-stat-value">{dashboardStats.loading ? '...' : `${dashboardStats.producedToday} units`}</p>
                 </div>
               </div>
               <div className="fm-stat-card">
                 <div className="fm-stat-icon">⏰</div>
                 <div className="fm-stat-info">
                   <h3>Pending Overtime</h3>
-                  <p className="fm-stat-value">2 requests</p>
+                  <p className="fm-stat-value">{dashboardStats.loading ? '...' : `${dashboardStats.pendingOvertime} requests`}</p>
                 </div>
               </div>
               <div className="fm-stat-card">
                 <div className="fm-stat-icon">✅</div>
                 <div className="fm-stat-info">
-                  <h3>Quality Rate</h3>
-                  <p className="fm-stat-value">98.5%</p>
+                  <h3>Quality / Efficiency</h3>
+                  <p className="fm-stat-value">{dashboardStats.loading ? '...' : `${dashboardStats.qualityRate || dashboardStats.efficiency || 0}%`}</p>
                 </div>
               </div>
             </div>
+
+            {dashboardStats.error && (
+              <div className="fm-dashboard-error">
+                {dashboardStats.error}
+              </div>
+            )}
 
             <div className="fm-feature-cards">
               <h3>Quick Actions</h3>

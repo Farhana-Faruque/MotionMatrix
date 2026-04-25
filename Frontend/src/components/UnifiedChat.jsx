@@ -13,11 +13,11 @@ export default function UnifiedChat({ user }) {
   const [onlineUsers, setOnlineUsers] = useState(new Set());
   const [typingUsers, setTypingUsers] = useState(new Set());
   const [searchQuery, setSearchQuery] = useState('');
+  const [unreadCounts, setUnreadCounts] = useState({}); // Track unread messages per contact
   const messagesEndRef = useRef(null);
   const listenerSetupDone = useRef(false);
   const typingTimeoutRef = useRef(null);
-  const processedMessageIds = useRef(new Set()); // Track processed message IDs
-  const recentMessageHashes = useRef(new Map()); // Track recent messages by content hash with timestamp
+  const contactsRefreshRef = useRef(null);
 
   // Initialize socket connection
   useEffect(() => {
@@ -33,8 +33,24 @@ export default function UnifiedChat({ user }) {
     setSocket(socketInstance);
     fetchContacts();
 
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible') {
+        fetchContacts();
+      }
+    };
+
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    contactsRefreshRef.current = setInterval(() => {
+      fetchContacts();
+    }, 15000);
+
     return () => {
       console.log('🧹 UnifiedChat cleanup');
+      if (contactsRefreshRef.current) {
+        clearInterval(contactsRefreshRef.current);
+        contactsRefreshRef.current = null;
+      }
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
       SocketService.removeListener('receive_message');
       SocketService.removeListener('error');
       SocketService.removeListener('user_online');
@@ -54,39 +70,29 @@ export default function UnifiedChat({ user }) {
     SocketService.onMessageReceived((message) => {
       console.log('📨 Received message via socket:', message);
       
-      // Check 1: If ID already processed
-      if (processedMessageIds.current.has(message.id)) {
-        console.log('⏭️ Message ID already processed, skipping:', message.id);
-        return;
-      }
-      
-      // Check 2: If same content arrived recently (duplicate detection)
-      if (isRecentDuplicate(message)) {
-        console.log('⏭️ Duplicate message content detected, skipping:', message.content);
-        return;
-      }
-      
-      // Check 3: If already in current messages state
+      // Deduplication: check if message already exists in state by ID
       setMessages(prev => {
         const alreadyExists = prev.some(m => m.id === message.id);
         if (alreadyExists) {
-          console.log('⏭️ Message already in state, skipping:', message.id);
+          console.log('⏭️ Message ID already in state, skipping duplicate:', message.id);
           return prev;
         }
         
-        // Skip if own message (already added via REST API)
-        if (message.fromId === user?.id) {
-          console.log('⏭️ Skipping own message (already added via REST API)');
-          return prev;
-        }
-        
-        // Mark as processed
-        processedMessageIds.current.add(message.id);
-        const hash = `${message.fromId}:${message.toId}:${message.content}`;
-        recentMessageHashes.current.set(hash, Date.now());
-        
-        console.log('✅ Adding new message to state');
+        // Add the new message
+        console.log('✅ Adding new message to state with ID:', message.id);
         return [...prev, message];
+      });
+      
+      // Update unread count if message is from a contact that's not currently selected
+      setUnreadCounts(prevCounts => {
+        if (message.fromId !== selectedContact?.id) {
+          console.log('🔴 Incrementing unread count for contact:', message.fromId);
+          return {
+            ...prevCounts,
+            [message.fromId]: (prevCounts[message.fromId] || 0) + 1
+          };
+        }
+        return prevCounts;
       });
     });
 
@@ -123,7 +129,7 @@ export default function UnifiedChat({ user }) {
         return newSet;
       });
     });
-  }, [socket, user?.id]);
+  }, [socket, selectedContact?.id]);
 
   // Auto-scroll to latest message
   useEffect(() => {
@@ -148,8 +154,6 @@ export default function UnifiedChat({ user }) {
         setContacts(data.contacts || []);
         
         if (data.contacts?.length > 0) {
-          processedMessageIds.current.clear(); // Clear for initial load
-          recentMessageHashes.current.clear();
           setSelectedContact(data.contacts[0]);
           setMessages([]); // Clear old messages
           loadMessages(data.contacts[0].id);
@@ -182,15 +186,6 @@ export default function UnifiedChat({ user }) {
       if (response.ok) {
         const data = await response.json();
         console.log(`✅ Loaded ${data.count} messages:`, data.messages);
-        
-        // Mark all loaded messages as processed
-        data.messages?.forEach(msg => {
-          processedMessageIds.current.add(msg.id);
-          // Create hash for duplicate detection
-          const hash = `${msg.fromId}:${msg.toId}:${msg.content}`;
-          recentMessageHashes.current.set(hash, Date.now());
-        });
-        
         setMessages(data.messages || []);
       } else {
         const errorData = await response.json();
@@ -203,26 +198,14 @@ export default function UnifiedChat({ user }) {
     }
   };
 
-  // Helper function to check if message is a recent duplicate
-  const isRecentDuplicate = (msg) => {
-    const hash = `${msg.fromId}:${msg.toId}:${msg.content}`;
-    const lastSeen = recentMessageHashes.current.get(hash);
-    
-    if (!lastSeen) return false;
-    
-    // If same content was seen within last 2 seconds, it's a duplicate
-    const timeDiff = Date.now() - lastSeen;
-    return timeDiff < 2000;
-  };
-
   // Handle contact selection
   const handleSelectContact = (contact) => {
     console.log(`📞 Selecting contact: ${contact.name}`);
     setSelectedContact(contact);
     setTypingUsers(new Set());
+    // Reset unread count for this contact when opening conversation
+    setUnreadCounts(prev => ({ ...prev, [contact.id]: 0 }));
     setMessages([]); // Clear old messages first
-    processedMessageIds.current.clear(); // Clear processed IDs for new contact
-    recentMessageHashes.current.clear(); // Clear hash cache for new contact
     loadMessages(contact.id);
   };
 
@@ -237,62 +220,23 @@ export default function UnifiedChat({ user }) {
     const toId = parseInt(selectedContact.id);
 
     try {
-      const token = localStorage.getItem('authToken');
-      
+      if (!socket?.connected) {
+        setError('Socket not connected. Please check your connection.');
+        return;
+      }
+
       console.log(`\n${'='.repeat(50)}`);
-      console.log(`📤 SENDING MESSAGE`);
+      console.log(`📤 SENDING MESSAGE VIA SOCKET`);
       console.log(`To: ${selectedContact.name} (ID: ${toId})`);
       console.log(`Content: "${messageContent.substring(0, 50)}..."`);
 
-      // Save via REST API
-      const response = await fetch('http://localhost:5000/api/messages/send', {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({ toId, content: messageContent })
-      });
+      // Clear input immediately
+      setNewMessage('');
 
-      console.log(`REST API Response: ${response.status} ${response.statusText}`);
-
-      if (response.ok) {
-        const data = await response.json();
-        console.log('✅ Message saved via API:', data.data);
-        
-        // Add message to state using server-provided ID
-        const savedMessage = {
-          id: data.data.id,
-          fromId: user.id,
-          toId,
-          content: messageContent,
-          createdAt: data.data.createdAt || new Date().toISOString(),
-          from: { id: user.id, name: user.name, role: user.role },
-          to: selectedContact
-        };
-        
-        // Mark as processed before emitting socket
-        processedMessageIds.current.add(savedMessage.id);
-        const hash = `${user.id}:${toId}:${messageContent}`;
-        recentMessageHashes.current.set(hash, Date.now());
-        console.log('🏷️ Message marked as processed with hash:', hash);
-        
-        setMessages(prev => [...prev, savedMessage]);
-        setNewMessage('');
-        
-        // Emit via socket only after REST API succeeds
-        if (socket?.connected) {
-          SocketService.sendMessage(toId, messageContent);
-          console.log('✅ Message emitted via socket');
-        }
-        
-        console.log(`${'='.repeat(50)}\n`);
-      } else {
-        const errorData = await response.json();
-        console.error('❌ REST API Error:', errorData);
-        setError(errorData.message || 'Failed to send message');
-        console.log(`${'='.repeat(50)}\n`);
-      }
+      // Send via socket ONLY (message will appear when socket echo arrives)
+      SocketService.sendMessage(toId, messageContent);
+      console.log('✅ Message emitted via socket - waiting for echo to add to chat...');
+      console.log(`${'='.repeat(50)}\n`);
     } catch (error) {
       console.error('❌ Error sending message:', error);
       setError('Failed to send message: ' + error.message);
@@ -377,6 +321,7 @@ export default function UnifiedChat({ user }) {
                   key={contact.id}
                   className={`contact-item ${selectedContact?.id === contact.id ? 'active' : ''}`}
                   onClick={() => handleSelectContact(contact)}
+                  style={{ position: 'relative' }}
                 >
                   <div className="contact-avatar">
                     <span className="avatar-text">{contact.name.charAt(0).toUpperCase()}</span>
@@ -386,6 +331,9 @@ export default function UnifiedChat({ user }) {
                     <div className="contact-name">{contact.name}</div>
                     <div className="contact-role">{contact.role.replace(/_/g, ' ')}</div>
                   </div>
+                  {unreadCounts[contact.id] > 0 && (
+                    <span className="unread-badge">{unreadCounts[contact.id]}</span>
+                  )}
                 </div>
               ))
             )}

@@ -5,6 +5,7 @@ export default function WorkersProfilePage({ user }) {
   const [assignedWorkers, setAssignedWorkers] = useState([]);
   const [unassignedWorkers, setUnassignedWorkers] = useState([]);
   const [floors, setFloors] = useState([]);
+  const [attendanceSummary, setAttendanceSummary] = useState({ workers: [], totals: { present: 0, absent: 0, totalHours: 0 } });
   const [selectedWorker, setSelectedWorker] = useState(null);
   const [selectedFloor, setSelectedFloor] = useState('');
   const [showAssignModal, setShowAssignModal] = useState(false);
@@ -49,6 +50,18 @@ export default function WorkersProfilePage({ user }) {
       if (unassignedRes.ok) {
         const unassignedData = await unassignedRes.json();
         setUnassignedWorkers(unassignedData.workers || []);
+      }
+
+      // Fetch attendance summary for the floor
+      if (user?.assignedFloorId) {
+        const attendanceRes = await fetch(`http://localhost:5000/api/users/attendance/floor/${user.assignedFloorId}/summary`, { headers });
+        if (attendanceRes.ok) {
+          const attendanceData = await attendanceRes.json();
+          setAttendanceSummary({
+            workers: attendanceData.workers || [],
+            totals: attendanceData.totals || { present: 0, absent: 0, totalHours: 0 }
+          });
+        }
       }
 
       setError(null);
@@ -105,6 +118,61 @@ export default function WorkersProfilePage({ user }) {
     setShowMessageModal(true);
   };
 
+  const handleUnassignWorker = async (worker) => {
+    try {
+      const token = localStorage.getItem('authToken');
+      const response = await fetch(`http://localhost:5000/api/users/${worker.id}/unassign-floor`, {
+        method: 'PUT',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      });
+
+      if (response.ok) {
+        setSuccessMessage(`${worker.name} moved to available workers`);
+        setTimeout(() => setSuccessMessage(''), 2500);
+        fetchData();
+      } else {
+        const errorData = await response.json();
+        alert(errorData.message || 'Failed to move worker to available list');
+      }
+    } catch (err) {
+      console.error('Error unassigning worker:', err);
+      alert('Error removing worker from floor');
+    }
+  };
+
+  const handleMarkAttendance = async (worker, status) => {
+    try {
+      const token = localStorage.getItem('authToken');
+      const response = await fetch('http://localhost:5000/api/users/attendance/mark', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          workerId: worker.id,
+          status,
+          date: new Date().toISOString()
+        })
+      });
+
+      if (response.ok) {
+        setSuccessMessage(`${worker.name} marked as ${status}`);
+        setTimeout(() => setSuccessMessage(''), 2000);
+        fetchData();
+      } else {
+        const errorData = await response.json();
+        alert(errorData.message || 'Failed to save attendance');
+      }
+    } catch (err) {
+      console.error('Error saving attendance:', err);
+      alert('Error saving attendance');
+    }
+  };
+
   const handleSubmitMessage = async () => {
     if (!messageText.trim()) {
       alert('Please enter a message');
@@ -113,7 +181,7 @@ export default function WorkersProfilePage({ user }) {
 
     try {
       const token = localStorage.getItem('authToken');
-      const response = await fetch('http://localhost:5000/api/messages', {
+      const response = await fetch('http://localhost:5000/api/messages/send', {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -130,7 +198,8 @@ export default function WorkersProfilePage({ user }) {
         setShowMessageModal(false);
         setTimeout(() => setSuccessMessage(''), 2000);
       } else {
-        alert('Failed to send message');
+        const errorData = await response.json();
+        alert(errorData.message || 'Failed to send message');
       }
     } catch (err) {
       console.error('Error sending message:', err);
@@ -149,16 +218,45 @@ export default function WorkersProfilePage({ user }) {
         {worker.assignedFloorId && (
           <p className="worker-floor">🏢 Floor #{worker.assignedFloorId}</p>
         )}
+        <div className="worker-hours-box">
+          <span>Today: {attendanceSummary.workers.find(item => item.id === worker.id)?.todayHours || 0}h</span>
+          <span>Week: {attendanceSummary.workers.find(item => item.id === worker.id)?.weekTotalHours || 0}h</span>
+        </div>
       </div>
       <div className="worker-card-actions">
         {isAssigned && (
-          <button 
-            className="btn-message"
-            onClick={() => handleSendMessage(worker)}
-            title="Send message to worker"
-          >
-            💬 Message
-          </button>
+          <>
+            <div className="attendance-action-row">
+              <button 
+                className="btn-present"
+                onClick={() => handleMarkAttendance(worker, 'present')}
+                title="Mark worker present"
+              >
+                ✅ Present
+              </button>
+              <button 
+                className="btn-absent"
+                onClick={() => handleMarkAttendance(worker, 'absent')}
+                title="Mark worker absent"
+              >
+                ❌ Absent
+              </button>
+            </div>
+            <button 
+              className="btn-message"
+              onClick={() => handleSendMessage(worker)}
+              title="Send message to worker"
+            >
+              💬 Message
+            </button>
+            <button
+              className="btn-unassign"
+              onClick={() => handleUnassignWorker(worker)}
+              title="Move worker to available workers"
+            >
+              ↩ Move To Available
+            </button>
+          </>
         )}
         <button 
           className="btn-assign"
@@ -191,6 +289,27 @@ export default function WorkersProfilePage({ user }) {
       )}
 
       <div className="workers-profile-container">
+        <section className="workers-section attendance-summary-section">
+          <div className="section-header">
+            <h3>Attendance Overview</h3>
+            <p>Mark workers present or absent and track total hours</p>
+          </div>
+          <div className="attendance-stats-grid">
+            <div className="attendance-stat-card">
+              <span className="attendance-stat-label">Present</span>
+              <span className="attendance-stat-value">{attendanceSummary.totals.present}</span>
+            </div>
+            <div className="attendance-stat-card">
+              <span className="attendance-stat-label">Absent</span>
+              <span className="attendance-stat-value">{attendanceSummary.totals.absent}</span>
+            </div>
+            <div className="attendance-stat-card">
+              <span className="attendance-stat-label">Total Work Hours Today</span>
+              <span className="attendance-stat-value">{attendanceSummary.totals.totalHours}h</span>
+            </div>
+          </div>
+        </section>
+
         {/* Assigned Workers Section */}
         <section className="workers-section">
           <div className="section-header">
@@ -320,6 +439,7 @@ export default function WorkersProfilePage({ user }) {
           </div>
         </div>
       )}
+
     </div>
   );
 }

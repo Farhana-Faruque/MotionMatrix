@@ -79,9 +79,9 @@ function App() {
     return () => window.removeEventListener('hashchange', handleHashChange)
   }, [])
 
-  const navigateToPage = (page) => {
+  const navigateToPage = (page, skipAuthCheck = false) => {
     // Prevent navigation to protected pages without authentication
-    if (['admin', 'worker', 'ownerManager', 'floorManager'].includes(page) && !hasAccessToPage(page)) {
+    if (!skipAuthCheck && ['admin', 'worker', 'ownerManager', 'floorManager'].includes(page) && !hasAccessToPage(page)) {
       console.warn(`Unauthorized access attempt to ${page}`)
       window.location.hash = '#login'
       return
@@ -105,39 +105,41 @@ function App() {
   }
 
   const handleLoginSuccess = (userRole, userData) => {
-    console.log('🎯 handleLoginSuccess called with:', { userRole, userData });
+    // Normalize role to lowercase and replace underscores
+    const normalizedRole = userRole.toLowerCase();
+    console.log('🎯 handleLoginSuccess called with:', { originalRole: userRole, normalizedRole, userData });
     
     // Admin users access the admin dashboard
-    if (userRole === 'admin') {
+    if (normalizedRole === 'admin') {
       console.log('✅ Setting admin user and navigating to admin dashboard');
       setAdminUser(userData)
       localStorage.setItem('adminUser', JSON.stringify(userData))
-      navigateToPage('admin')
+      navigateToPage('admin', true)
     } 
     // Worker users access the worker dashboard
-    else if (userRole === 'worker') {
+    else if (normalizedRole === 'worker') {
       console.log('✅ Setting worker user and navigating to worker dashboard');
       setWorkerUser(userData)
       localStorage.setItem('workerUser', JSON.stringify(userData))
-      navigateToPage('worker')
+      navigateToPage('worker', true)
     }
     // Owner and Manager users access the owner/manager dashboard
-    else if (userRole === 'owner' || userRole === 'manager') {
+    else if (normalizedRole === 'owner' || normalizedRole === 'manager') {
       console.log('✅ Setting owner/manager user and navigating to ownerManager dashboard');
       setOwnerManagerUser(userData)
       localStorage.setItem('ownerManagerUser', JSON.stringify(userData))
-      navigateToPage('ownerManager')
+      navigateToPage('ownerManager', true)
     }
     // Floor Manager users access the floor manager dashboard
-    else if (userRole === 'floor_manager') {
+    else if (normalizedRole === 'floor_manager') {
       console.log('✅ Setting floor manager user and navigating to floorManager dashboard');
       setFloorManagerUser(userData)
       localStorage.setItem('floorManagerUser', JSON.stringify(userData))
-      navigateToPage('floorManager')
+      navigateToPage('floorManager', true)
     }
     // Other roles cannot access the dashboards
     else {
-      console.warn('⚠️ Unknown role:', userRole);
+      console.warn('⚠️ Unknown role:', normalizedRole);
       navigateToPage('home')
     }
   }

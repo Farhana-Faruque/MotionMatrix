@@ -369,7 +369,7 @@ const AdminDashboard = ({ onLogout, adminUser }) => {
           )}
 
           {/* Profile Page */}
-          {activeSection === 'profile' && <AdminProfile user={adminData} currentUser={user} />}
+          {activeSection === 'profile' && <AdminProfile user={adminData} currentUser={adminData} />}
 
           {/* Add Worker */}
           {activeSection === 'addWorker' && <AddWorker />}
@@ -383,7 +383,7 @@ const AdminDashboard = ({ onLogout, adminUser }) => {
           {activeSection === 'assignCCTV' && <AssignCCTV />}
 
           {/* Chat */}
-          {activeSection === 'chat' && <UnifiedChat user={adminUser} />}
+          {activeSection === 'chat' && <UnifiedChat user={adminData} />}
         </section>
       </main>
     </div>

@@ -16,24 +16,30 @@
 
 /* Sidebar */
 .fm-sidebar {
-  width: 250px;
+  width: 280px;
   background: linear-gradient(180deg, #1B4332 0%, #2D5A3D 100%);
   color: white;
-  padding: 25px 15px;
+  padding: 0;
   overflow-y: auto;
   border-right: 2px solid #D97706;
+  box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
 }
 
 .fm-sidebar-header {
-  margin-bottom: 30px;
-  padding-bottom: 15px;
-  border-bottom: 2px solid rgba(255, 255, 255, 0.2);
+  padding: 30px 20px 15px;
+  margin-bottom: 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(0, 0, 0, 0.2);
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
 }
 
 .fm-sidebar-header h2 {
   margin: 0 0 8px 0;
   font-size: 1.3rem;
   font-weight: 700;
+  line-height: 1.15;
 }
 
 .fm-subtitle {
@@ -46,32 +52,47 @@
   display: flex;
   flex-direction: column;
   gap: 8px;
+  padding: 20px;
 }
 
 .fm-menu-item {
-  padding: 12px 15px;
-  background: transparent;
+  padding: 12px 16px;
+  background: rgba(255, 255, 255, 0.1);
   border: none;
   border-left: 4px solid transparent;
-  color: #D8E2DC;
+  color: rgba(255, 255, 255, 0.85);
   text-align: left;
   cursor: pointer;
   font-size: 0.95rem;
   font-weight: 500;
   transition: all 0.3s ease;
-  border-radius: 0 8px 8px 0;
+  border-radius: 10px;
 }
 
 .fm-menu-item:hover {
-  background: rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.18);
   color: white;
+  transform: translateX(4px);
 }
 
 .fm-menu-item.active {
-  background: rgba(217, 119, 6, 0.2);
-  border-left-color: #D97706;
+  background: white;
+  border-left-color: white;
+  color: #1B4332;
+  font-weight: 700;
+}
+
+.fm-logout-btn {
+  margin-top: 20px;
+  background: rgba(255, 255, 255, 0.14);
   color: white;
-  font-weight: 600;
+  border: 2px solid rgba(255, 255, 255, 0.9);
+}
+
+.fm-logout-btn:hover {
+  background: rgba(255, 255, 255, 0.92);
+  color: #1B4332;
+  border-color: white;
 }
 
 /* Main Content */
@@ -163,6 +184,15 @@
   margin: 0;
   font-size: 1.4rem;
   font-weight: 700;
+}
+
+.fm-dashboard-error {
+  background: #FEE2E2;
+  color: #B91C1C;
+  border-left: 4px solid #DC2626;
+  padding: 14px 18px;
+  border-radius: 10px;
+  font-weight: 600;
 }
 
 /* Quick Actions */

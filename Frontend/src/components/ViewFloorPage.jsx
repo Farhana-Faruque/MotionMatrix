@@ -3,7 +3,6 @@ import '../styles/ViewFloorPage.css';
 
 export default function ViewFloorPage({ user }) {
   const [floorData, setFloorData] = useState(null);
-  const [workerActivity, setWorkerActivity] = useState([]);
   const [cctvCameras, setCctvCameras] = useState([]);
   const [selectedCctv, setSelectedCctv] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -47,8 +46,9 @@ export default function ViewFloorPage({ user }) {
         });
         
         if (floorRes.ok) {
-          const floorData = await floorRes.json();
-          setFloorData(floorData.data || floorData);
+          const floorPayload = await floorRes.json();
+          const floor = floorPayload.floor || floorPayload.data || floorPayload;
+          setFloorData(floor);
         } else {
           setError('Failed to load floor data');
         }
@@ -67,10 +67,9 @@ export default function ViewFloorPage({ user }) {
           if (cctvs.length > 0) {
             setSelectedCctv(cctvs[0]);
           }
+        } else {
+          setCctvCameras([]);
         }
-
-        // Initialize empty worker activity for now
-        setWorkerActivity([]);
         setLoading(false);
       } catch (error) {
         console.error('Error fetching floor data:', error);
@@ -110,7 +109,7 @@ export default function ViewFloorPage({ user }) {
     <div className="view-floor-page">
       <div className="fm-page-header">
         <h2>Floor Monitoring</h2>
-        <p>Real-time worker activity and CCTV surveillance</p>
+        <p>View assigned CCTV cameras and live floor coverage</p>
       </div>
 
       <div className="floor-monitoring-grid">
@@ -132,8 +131,8 @@ export default function ViewFloorPage({ user }) {
             </div>
             <div className="info-row">
               <span className="info-label">Status:</span>
-              <span className={`info-value status-${floorData.status}`}>
-                {floorData.status.toUpperCase()}
+              <span className={`info-value status-${(floorData.status || 'active').toLowerCase()}`}>
+                {(floorData.status || 'active').toUpperCase()}
               </span>
             </div>
           </div>
@@ -190,61 +189,39 @@ export default function ViewFloorPage({ user }) {
         )}
       </div>
 
-      {/* Worker Activity */}
-      <div className="worker-activity-section">
-        <h3>Worker Activity</h3>
-        <div className="activity-table-wrapper">
-          <table className="activity-table">
-            <thead>
-              <tr>
-                <th>Worker</th>
-                <th>Activity</th>
-                <th>CCTV Monitor</th>
-                <th>Status</th>
-                <th>Last Updated</th>
-              </tr>
-            </thead>
-            <tbody>
-              {workerActivity.length === 0 ? (
-                <tr>
-                  <td colSpan="5" className="no-activity">
-                    No active workers on this floor
-                  </td>
-                </tr>
-              ) : (
-                workerActivity.map(activity => {
-                  const worker = getWorkerInfo(activity.workerId);
-                  const camera = cctvCameras.find(c => c.id === activity.cctvId);
-                  return (
-                    <tr key={activity.id}>
-                      <td className="worker-name">
-                        <span className="worker-icon">👤</span>
-                        {worker?.name || 'Unknown'}
-                      </td>
-                      <td>{activity.activity}</td>
-                      <td>
-                        <button 
-                          className="cctv-link"
-                          onClick={() => setSelectedCctv(camera)}
-                        >
-                          {camera?.name}
-                        </button>
-                      </td>
-                      <td>
-                        <span className={`status-badge status-${activity.status}`}>
-                          {activity.status}
-                        </span>
-                      </td>
-                      <td className="timestamp">
-                        {new Date(activity.timestamp).toLocaleTimeString()}
-                      </td>
-                    </tr>
-                  );
-                })
-              )}
-            </tbody>
-          </table>
-        </div>
+      <div className="assigned-camera-views-section">
+        <h3>Assigned Camera Views</h3>
+        {cctvCameras.length === 0 ? (
+          <div className="no-camera-message">
+            No CCTV cameras are assigned to this floor yet.
+          </div>
+        ) : (
+          <div className="camera-views-grid">
+            {cctvCameras.map(camera => (
+              <div
+                key={camera.id}
+                className={`camera-view-tile ${selectedCctv?.id === camera.id ? 'active' : ''}`}
+                onClick={() => setSelectedCctv(camera)}
+              >
+                <div className="camera-view-header">
+                  <h4>{camera.name}</h4>
+                  <span className={`camera-status status-${(camera.status || 'active').toLowerCase()}`}>
+                    {camera.status || 'active'}
+                  </span>
+                </div>
+                <div className="camera-view-feed">
+                  <span>📹 {camera.location}</span>
+                </div>
+                <div className="camera-view-meta">
+                  <span>IP: {camera.ipAddress || 'N/A'}</span>
+                  <button type="button" onClick={(e) => { e.stopPropagation(); setSelectedCctv(camera); }}>
+                    Open Main View
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );

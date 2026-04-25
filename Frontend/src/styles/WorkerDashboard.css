@@ -8,7 +8,7 @@
 
 /* Sidebar */
 .sidebar {
-  width: 250px;
+  width: 280px;
   background: linear-gradient(180deg, #1B4332 0%, #2D5A3D 100%);
   color: white;
   padding: 0;
@@ -20,55 +20,64 @@
   padding: 30px 20px;
   border-bottom: 1px solid rgba(255, 255, 255, 0.1);
   background: rgba(0, 0, 0, 0.2);
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
 }
 
 .sidebar-header h2 {
   margin: 0;
   font-size: 1.5rem;
   color: white;
+  line-height: 1.15;
 }
 
 .sidebar-menu {
   display: flex;
   flex-direction: column;
-  padding: 20px 0;
+  gap: 8px;
+  padding: 20px;
 }
 
 .menu-item {
-  padding: 15px 20px;
+  padding: 12px 16px;
   border: none;
-  background: none;
-  color: rgba(255, 255, 255, 0.8);
+  background: rgba(255, 255, 255, 0.1);
+  color: rgba(255, 255, 255, 0.85);
   text-align: left;
   cursor: pointer;
   font-size: 0.95rem;
   transition: all 0.3s ease;
   border-left: 4px solid transparent;
+  border-radius: 10px;
   font-weight: 500;
 }
 
 .menu-item:hover {
-  background: rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.18);
   border-left-color: #D97706;
   color: white;
+  transform: translateX(4px);
 }
 
 .menu-item.active {
-  background: rgba(255, 255, 255, 0.15);
-  border-left-color: #D97706;
-  color: white;
+  background: white;
+  border-left-color: white;
+  color: #1B4332;
+  font-weight: 700;
 }
 
 .logout-btn {
-  margin-top: auto;
-  border-top: 1px solid rgba(255, 255, 255, 0.1);
   margin-top: 20px;
-  color: rgba(239, 68, 68, 0.9);
+  background: rgba(255, 255, 255, 0.14);
+  color: #fff;
+  border: 2px solid rgba(255, 255, 255, 0.9);
 }
 
 .logout-btn:hover {
-  background: rgba(239, 68, 68, 0.1);
-  color: #EF4444;
+  background: rgba(255, 255, 255, 0.92);
+  color: #1B4332;
+  border-color: white;
 }
 
 /* Main Content Area */

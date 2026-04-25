@@ -9,7 +9,7 @@ export default function OwnerManagerDashboard({ user }) {
   const [activeSection, setActiveSection] = useState('dashboard');
 
   const getUserTitle = () => {
-    return user?.role === 'owner' ? 'Owner' : 'Manager';
+    return user?.role?.toUpperCase() === 'OWNER' ? 'Owner' : 'Manager';
   };
 
   return (

@@ -184,6 +184,30 @@
   text-overflow: ellipsis;
 }
 
+.unread-badge {
+  background: #ff4444;
+  color: white;
+  border-radius: 50%;
+  padding: 2px 7px;
+  font-size: 11px;
+  font-weight: 700;
+  flex-shrink: 0;
+  position: absolute;
+  top: 10px;
+  right: 12px;
+  box-shadow: 0 2px 4px rgba(255, 68, 68, 0.3);
+  animation: pulse 0.6s ease-in-out;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.1);
+  }
+}
+
 /* ==================== MAIN CHAT AREA ==================== */
 .chat-main {
   flex: 1;
@@ -297,7 +321,7 @@
   flex: 1;
   overflow-y: auto;
   display: flex;
-  flex-direction: column;
+  flex-direction: column-reverse;
   padding: 16px;
   gap: 12px;
   background: #fafafa;

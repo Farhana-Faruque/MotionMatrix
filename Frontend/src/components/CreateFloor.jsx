@@ -2,10 +2,12 @@ import React, { useState, useEffect } from 'react';
 import '../styles/CreateFloor.css';
 
 const CreateFloor = ({ onSelectFloor }) => {
+  console.log('CreateFloor component mounted');
   const [floors, setFloors] = useState([]);
   const [showForm, setShowForm] = useState(false);
   const [editingId, setEditingId] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [errorMessage, setErrorMessage] = useState('');
   const [formData, setFormData] = useState({
     name: '',
     level: '',
@@ -20,6 +22,7 @@ const CreateFloor = ({ onSelectFloor }) => {
   const fetchFloors = async () => {
     try {
       setLoading(true);
+      setErrorMessage('');
       const token = localStorage.getItem('authToken');
       
       const response = await fetch('http://localhost:5000/api/floors', {
@@ -31,9 +34,13 @@ const CreateFloor = ({ onSelectFloor }) => {
       if (response.ok) {
         const data = await response.json();
         setFloors(data.floors || []);
+      } else {
+        const errData = await response.json().catch(() => ({}));
+        setErrorMessage(errData.message || 'Failed to fetch floors');
       }
     } catch (error) {
       console.error('Error fetching floors:', error);
+      setErrorMessage('Failed to fetch floors');
     } finally {
       setLoading(false);
     }
@@ -52,6 +59,7 @@ const CreateFloor = ({ onSelectFloor }) => {
     if (formData.name && formData.level !== '' && formData.area !== '') {
       try {
         setLoading(true);
+        setErrorMessage('');
         const token = localStorage.getItem('authToken');
         
         const response = await fetch('http://localhost:5000/api/floors', {
@@ -70,12 +78,21 @@ const CreateFloor = ({ onSelectFloor }) => {
         
         if (response.ok) {
           const data = await response.json();
-          setFloors([...floors, data.data]);
+          const createdFloor = data.floor || data.data;
+          if (createdFloor) {
+            setFloors(prev => [...prev, createdFloor]);
+          } else {
+            await fetchFloors();
+          }
           setFormData({ name: '', level: '', area: '' });
           setShowForm(false);
+        } else {
+          const errData = await response.json().catch(() => ({}));
+          setErrorMessage(errData.message || 'Failed to create floor');
         }
       } catch (error) {
         console.error('Error adding floor:', error);
+        setErrorMessage('Failed to create floor');
       } finally {
         setLoading(false);
       }
@@ -97,6 +114,7 @@ const CreateFloor = ({ onSelectFloor }) => {
     if (formData.name && formData.level !== '' && formData.area !== '') {
       try {
         setLoading(true);
+        setErrorMessage('');
         const token = localStorage.getItem('authToken');
         
         const response = await fetch(`http://localhost:5000/api/floors/${editingId}`, {
@@ -113,17 +131,23 @@ const CreateFloor = ({ onSelectFloor }) => {
         });
         
         if (response.ok) {
-          setFloors(floors.map(f => 
-            f.id === editingId 
-              ? { ...f, name: formData.name, level: formData.level, area: formData.area }
+          const data = await response.json();
+          const updatedFloor = data.floor;
+          setFloors(floors.map(f => (
+            f.id === editingId
+              ? (updatedFloor || { ...f, name: formData.name, level: formData.level, area: formData.area })
               : f
-          ));
+          )));
           setFormData({ name: '', level: '', area: '' });
           setEditingId(null);
           setShowForm(false);
+        } else {
+          const errData = await response.json().catch(() => ({}));
+          setErrorMessage(errData.message || 'Failed to update floor');
         }
       } catch (error) {
         console.error('Error updating floor:', error);
+        setErrorMessage('Failed to update floor');
       } finally {
         setLoading(false);
       }
@@ -133,6 +157,7 @@ const CreateFloor = ({ onSelectFloor }) => {
   const handleDeleteFloor = async (id) => {
     try {
       setLoading(true);
+      setErrorMessage('');
       const token = localStorage.getItem('authToken');
       
       const response = await fetch(`http://localhost:5000/api/floors/${id}`, {
@@ -144,9 +169,13 @@ const CreateFloor = ({ onSelectFloor }) => {
       
       if (response.ok) {
         setFloors(floors.filter(f => f.id !== id));
+      } else {
+        const errData = await response.json().catch(() => ({}));
+        setErrorMessage(errData.message || 'Failed to delete floor');
       }
     } catch (error) {
       console.error('Error deleting floor:', error);
+      setErrorMessage('Failed to delete floor');
     } finally {
       setLoading(false);
     }
@@ -157,6 +186,8 @@ const CreateFloor = ({ onSelectFloor }) => {
     setEditingId(null);
     setShowForm(false);
   };
+
+  const getFloorStatus = (floor) => floor.status || 'active';
 
   return (
     <div className="create-floor-container">
@@ -169,6 +200,10 @@ const CreateFloor = ({ onSelectFloor }) => {
           ➕ Add New Floor
         </button>
       </div>
+
+      {errorMessage && (
+        <div className="error-message">{errorMessage}</div>
+      )}
 
       {/* Add/Edit Floor Form */}
       {showForm && (
@@ -248,8 +283,8 @@ const CreateFloor = ({ onSelectFloor }) => {
                     <h4>{floor.name}</h4>
                     <p className="floor-level">Level {floor.level}</p>
                   </div>
-                  <span className={`status-badge ${floor.status}`}>
-                    {floor.status.charAt(0).toUpperCase() + floor.status.slice(1)}
+                  <span className={`status-badge ${getFloorStatus(floor)}`}>
+                    {getFloorStatus(floor).charAt(0).toUpperCase() + getFloorStatus(floor).slice(1)}
                   </span>
                 </div>
 
