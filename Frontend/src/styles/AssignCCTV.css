@@ -1,0 +1,432 @@
+/* Assign CCTV Styles */
+
+.assign-cctv-container {
+  padding: 30px;
+  background: #F5F2ED;
+  min-height: calc(100vh - 200px);
+}
+
+.assign-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 30px;
+}
+
+.assign-header h2 {
+  color: #1B4332;
+  font-size: 2rem;
+  margin: 0;
+}
+
+.btn-add-cctv {
+  background: linear-gradient(135deg, #1B4332 0%, #2D5A3D 100%);
+  color: white;
+  border: none;
+  padding: 12px 24px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: all 0.3s ease;
+  font-size: 0.95rem;
+}
+
+.btn-add-cctv:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 5px 15px rgba(27, 67, 50, 0.3);
+}
+
+/* Floor Selector */
+.floor-selector-wrapper {
+  background: #FFFFFF;
+  padding: 20px;
+  border-radius: 12px;
+  margin-bottom: 30px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.floor-selector-wrapper label {
+  display: block;
+  color: #1B4332;
+  font-weight: 600;
+  margin-bottom: 10px;
+  font-size: 0.95rem;
+}
+
+.floor-selector {
+  width: 100%;
+  padding: 12px;
+  border: 2px solid #D8E2DC;
+  border-radius: 8px;
+  font-size: 0.95rem;
+  color: #1B4332;
+  font-family: inherit;
+  cursor: pointer;
+  background: white;
+  transition: all 0.3s ease;
+  box-sizing: border-box;
+}
+
+.floor-selector:focus {
+  outline: none;
+  border-color: #1B4332;
+  box-shadow: 0 0 0 4px rgba(27, 67, 50, 0.1);
+}
+
+/* Current Floor Info */
+.current-floor-info {
+  background: linear-gradient(135deg, #1B4332 0%, #2D5A3D 100%);
+  color: white;
+  padding: 20px;
+  border-radius: 12px;
+  margin-bottom: 30px;
+  box-shadow: 0 4px 12px rgba(27, 67, 50, 0.15);
+}
+
+.floor-stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 15px;
+}
+
+.stat {
+  background: rgba(255, 255, 255, 0.1);
+  padding: 15px;
+  border-radius: 8px;
+  text-align: center;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.stat-value {
+  display: block;
+  font-size: 2.5rem;
+  font-weight: 900;
+  margin: 8px 0 0 0;
+  color: #FFFFFF;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+}
+
+.stat-label {
+  display: block;
+  font-size: 0.9rem;
+  opacity: 1;
+  margin: 0 0 5px 0;
+  color: #F0F0F0;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  font-weight: 700;
+}
+
+/* Add CCTV Form */
+.cctv-form-wrapper {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.cctv-form {
+  background: #FFFFFF;
+  padding: 30px;
+  border-radius: 12px;
+  max-width: 500px;
+  width: 90%;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+}
+
+.cctv-form h3 {
+  color: #1B4332;
+  margin-top: 0;
+  margin-bottom: 20px;
+  font-size: 1.5rem;
+}
+
+.cctv-form .form-group {
+  margin-bottom: 20px;
+}
+
+.cctv-form .form-group label {
+  display: block;
+  color: #1B4332;
+  font-weight: 600;
+  margin-bottom: 8px;
+  font-size: 0.9rem;
+}
+
+.cctv-form .form-group input,
+.cctv-form .form-group select {
+  width: 100%;
+  padding: 12px;
+  border: 2px solid #D8E2DC;
+  border-radius: 8px;
+  font-size: 0.95rem;
+  color: #1B4332;
+  font-family: inherit;
+  box-sizing: border-box;
+  transition: all 0.3s ease;
+  background: white;
+  cursor: pointer;
+}
+
+.cctv-form .form-group input:focus,
+.cctv-form .form-group select:focus {
+  outline: none;
+  border-color: #1B4332;
+  box-shadow: 0 0 0 4px rgba(27, 67, 50, 0.1);
+}
+
+.form-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 25px;
+}
+
+.btn-submit,
+.btn-cancel {
+  flex: 1;
+  padding: 12px;
+  border: none;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-size: 0.95rem;
+}
+
+.btn-submit {
+  background: linear-gradient(135deg, #1B4332 0%, #2D5A3D 100%);
+  color: white;
+}
+
+.btn-submit:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 5px 15px rgba(27, 67, 50, 0.3);
+}
+
+.btn-cancel {
+  background: #D8E2DC;
+  color: #1B4332;
+}
+
+.btn-cancel:hover {
+  background: #CBD8D0;
+}
+
+/* CCTV Assignment Grid */
+.cctv-assignment-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+  margin-top: 30px;
+}
+
+.assigned-section,
+.available-section {
+  background: #FFFFFF;
+  padding: 20px;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  border-top: 4px solid #1B4332;
+}
+
+.assigned-section h3,
+.available-section h3 {
+  color: #1B4332;
+  margin-top: 0;
+  margin-bottom: 15px;
+  font-size: 1.1rem;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.cctv-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  max-height: 500px;
+  overflow-y: auto;
+}
+
+.cctv-list::-webkit-scrollbar {
+  width: 6px;
+}
+
+.cctv-list::-webkit-scrollbar-track {
+  background: #F5F2ED;
+  border-radius: 3px;
+}
+
+.cctv-list::-webkit-scrollbar-thumb {
+  background: #D8E2DC;
+  border-radius: 3px;
+}
+
+.cctv-list::-webkit-scrollbar-thumb:hover {
+  background: #1B4332;
+}
+
+.cctv-item {
+  background: #F5F2ED;
+  padding: 15px;
+  border-radius: 8px;
+  border-left: 4px solid #D97706;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  transition: all 0.3s ease;
+}
+
+.cctv-item:hover {
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  background: #FFFFFF;
+}
+
+.cctv-info {
+  flex: 1;
+}
+
+.cctv-info h4 {
+  color: #1B4332;
+  margin: 0 0 5px 0;
+  font-size: 0.95rem;
+}
+
+.cctv-detail {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 5px;
+  font-size: 0.85rem;
+}
+
+.cctv-detail .label {
+  color: #999;
+  font-weight: 500;
+}
+
+.cctv-detail .value {
+  color: #1B4332;
+  font-weight: 600;
+}
+
+.cctv-status {
+  font-size: 0.75rem;
+  padding: 2px 8px;
+  border-radius: 4px;
+  display: inline-block;
+  margin-top: 5px;
+}
+
+.cctv-status.active {
+  background: rgba(16, 185, 129, 0.1);
+  color: #10B981;
+}
+
+.cctv-status.offline {
+  background: rgba(239, 68, 68, 0.1);
+  color: #EF4444;
+}
+
+.cctv-actions {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.btn-assign,
+.btn-remove {
+  padding: 8px 12px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 0.8rem;
+  transition: all 0.3s ease;
+  white-space: nowrap;
+}
+
+.btn-assign {
+  background: #1B4332;
+  color: white;
+}
+
+.btn-assign:hover {
+  background: #2D5A3D;
+  transform: translateY(-2px);
+}
+
+.btn-remove {
+  background: #EF4444;
+  color: white;
+}
+
+.btn-remove:hover {
+  background: #DC2626;
+  transform: translateY(-2px);
+}
+
+.empty-state {
+  text-align: center;
+  padding: 40px 20px;
+  color: #999;
+}
+
+.empty-state p {
+  margin: 0;
+  font-size: 0.95rem;
+}
+
+/* Responsive */
+@media (max-width: 1024px) {
+  .cctv-assignment-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 768px) {
+  .assign-cctv-container {
+    padding: 20px;
+  }
+
+  .assign-header {
+    flex-direction: column;
+    gap: 15px;
+    align-items: stretch;
+  }
+
+  .btn-add-cctv {
+    width: 100%;
+  }
+
+  .floor-stats {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .cctv-item {
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .cctv-actions {
+    width: 100%;
+  }
+
+  .btn-assign,
+  .btn-remove {
+    flex: 1;
+  }
+
+  .cctv-form {
+    padding: 20px;
+  }
+
+  .cctv-form h3 {
+    font-size: 1.3rem;
+  }
+}

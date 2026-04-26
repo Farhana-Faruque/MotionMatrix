@@ -1,0 +1,561 @@
+/* View Floor Page Styles */
+
+.view-floor-page {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.view-floor-loading {
+  padding: 40px;
+  text-align: center;
+  min-height: 300px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.view-floor-loading.error-state {
+  background: #FEF2F2;
+}
+
+.loading-spinner {
+  color: #1B4332;
+  font-size: 1.1rem;
+  font-weight: 600;
+}
+
+.error-message {
+  color: #991B1B;
+  font-size: 1.1rem;
+  font-weight: 600;
+  background: #FEE2E2;
+  padding: 20px;
+  border-radius: 8px;
+  border-left: 4px solid #DC2626;
+}
+
+/* Floor Monitoring Grid */
+.floor-monitoring-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 20px;
+}
+
+/* Floor Overview Card */
+.floor-overview-card,
+.cctv-cameras-card,
+.camera-view-card {
+  background: white;
+  padding: 20px;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.floor-overview-card h3,
+.cctv-cameras-card h3,
+.camera-view-card h3 {
+  color: #1B4332;
+  margin: 0 0 15px 0;
+  font-size: 1.1rem;
+  font-weight: 600;
+  border-bottom: 2px solid #D8E2DC;
+  padding-bottom: 10px;
+}
+
+.floor-info {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.info-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 0;
+  border-bottom: 1px solid #E5E5E5;
+}
+
+.info-row:last-child {
+  border-bottom: none;
+}
+
+.info-label {
+  color: #999;
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+.info-value {
+  color: #1B4332;
+  font-size: 0.95rem;
+  font-weight: 600;
+}
+
+.status-active {
+  background: #D1FAE5;
+  color: #065F46;
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 0.8rem;
+}
+
+.status-inactive {
+  background: #FEE2E2;
+  color: #991B1B;
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 0.8rem;
+}
+
+/* CCTV Cameras List */
+.cameras-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.camera-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 12px;
+  background: #F5F2ED;
+  border: 2px solid #D8E2DC;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-align: left;
+}
+
+.camera-item:hover {
+  background: #EFEFEF;
+  border-color: #D97706;
+}
+
+.camera-item.active {
+  background: #E8F5E9;
+  border-color: #1B4332;
+}
+
+.camera-icon {
+  font-size: 1.5rem;
+  min-width: 30px;
+}
+
+.camera-info {
+  flex: 1;
+}
+
+.camera-name {
+  color: #1B4332;
+  margin: 0 0 4px 0;
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+.camera-location {
+  color: #666;
+  margin: 0 0 6px 0;
+  font-size: 0.85rem;
+}
+
+.camera-status {
+  display: inline-block;
+  padding: 3px 10px;
+  border-radius: 12px;
+  font-size: 0.7rem;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+/* Camera View */
+.camera-display {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.camera-feed {
+  background: #000;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.camera-placeholder {
+  aspect-ratio: 16 / 9;
+  background: linear-gradient(135deg, #1B4332 0%, #2D5A3D 100%);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.2rem;
+  font-weight: 600;
+}
+
+.camera-controls {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+  background: #F5F2ED;
+  padding: 12px;
+  border-radius: 8px;
+}
+
+.camera-controls button {
+  padding: 8px 16px;
+  background: white;
+  border: 1px solid #D8E2DC;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.85rem;
+  transition: all 0.3s ease;
+}
+
+.camera-controls button:hover {
+  background: #1B4332;
+  color: white;
+  border-color: #1B4332;
+}
+
+.camera-details {
+  background: #F5F2ED;
+  padding: 15px;
+  border-radius: 8px;
+  font-size: 0.9rem;
+}
+
+.camera-details p {
+  margin: 0 0 10px 0;
+  color: #1B4332;
+}
+
+.camera-details p:last-child {
+  margin-bottom: 0;
+}
+
+.status-badge {
+  display: inline-block;
+  padding: 4px 12px;
+  border-radius: 12px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  margin-left: 10px;
+}
+
+.assigned-camera-views-section {
+  background: white;
+  padding: 24px;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.assigned-camera-views-section h3 {
+  color: #1B4332;
+  margin: 0 0 18px 0;
+  font-size: 1.2rem;
+  font-weight: 700;
+  border-bottom: 2px solid #D8E2DC;
+  padding-bottom: 10px;
+}
+
+.no-camera-message {
+  background: #F5F2ED;
+  border: 1px dashed #C7D2CC;
+  border-radius: 10px;
+  padding: 18px;
+  color: #4B6358;
+  font-weight: 600;
+}
+
+.camera-views-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 14px;
+}
+
+.camera-view-tile {
+  border: 2px solid #D8E2DC;
+  border-radius: 10px;
+  background: #FFFFFF;
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  cursor: pointer;
+  transition: all 0.25s ease;
+}
+
+.camera-view-tile:hover {
+  border-color: #2D5A3D;
+  box-shadow: 0 8px 18px rgba(27, 67, 50, 0.14);
+}
+
+.camera-view-tile.active {
+  border-color: #1B4332;
+  background: #F2F8F4;
+}
+
+.camera-view-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+}
+
+.camera-view-header h4 {
+  margin: 0;
+  color: #1B4332;
+  font-size: 0.98rem;
+}
+
+.camera-view-feed {
+  min-height: 130px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #E6F5EC;
+  font-weight: 600;
+  background: linear-gradient(145deg, #1B4332 0%, #2D5A3D 100%);
+  text-align: center;
+  padding: 12px;
+}
+
+.camera-view-meta {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+  color: #4B6358;
+  font-size: 0.82rem;
+}
+
+.camera-view-meta button {
+  border: none;
+  background: #1B4332;
+  color: white;
+  border-radius: 6px;
+  padding: 7px 10px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.camera-view-meta button:hover {
+  background: #2D5A3D;
+}
+
+/* Worker Activity Section */
+.worker-activity-section {
+  background: white;
+  padding: 25px;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.worker-activity-section h3 {
+  color: #1B4332;
+  margin: 0 0 20px 0;
+  font-size: 1.1rem;
+  font-weight: 600;
+  border-bottom: 2px solid #D8E2DC;
+  padding-bottom: 10px;
+}
+
+.activity-table-wrapper {
+  overflow-x: auto;
+}
+
+.activity-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.activity-table thead {
+  background: #F5F2ED;
+}
+
+.activity-table th {
+  color: #1B4332;
+  padding: 12px;
+  text-align: left;
+  font-weight: 600;
+  border-bottom: 2px solid #D8E2DC;
+}
+
+.activity-table td {
+  color: #1B4332;
+  padding: 12px;
+  border-bottom: 1px solid #E5E5E5;
+}
+
+.activity-table tbody tr:hover {
+  background: #F5F2ED;
+}
+
+.worker-name {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 600;
+}
+
+.worker-icon {
+  font-size: 1.2rem;
+}
+
+.cctv-link {
+  background: #1B4332;
+  color: white;
+  border: none;
+  padding: 6px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.85rem;
+  font-weight: 600;
+  transition: all 0.3s ease;
+}
+
+.cctv-link:hover {
+  background: #2D5A3D;
+  transform: scale(1.05);
+}
+
+.status-badge {
+  padding: 4px 12px;
+  border-radius: 12px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  text-transform: capitalize;
+}
+
+.status-active {
+  background: #D1FAE5;
+  color: #065F46;
+}
+
+.timestamp {
+  color: #999;
+  font-size: 0.85rem;
+}
+
+.no-activity {
+  text-align: center;
+  color: #999;
+  padding: 20px;
+}
+
+/* Responsive */
+@media (max-width: 1024px) {
+  .floor-monitoring-grid {
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  }
+}
+
+@media (max-width: 768px) {
+  .floor-monitoring-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .activity-table {
+    font-size: 0.85rem;
+  }
+
+  .activity-table th,
+  .activity-table td {
+    padding: 8px;
+  }
+
+  .camera-controls {
+    flex-wrap: wrap;
+  }
+}
+
+.floor-attendance-section {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.attendance-summary-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 15px;
+}
+
+.attendance-summary-card,
+.daily-graph-card {
+  background: white;
+  padding: 20px;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.attendance-summary-card {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  border-left: 4px solid #1B4332;
+}
+
+.attendance-summary-label {
+  color: #999;
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+.attendance-summary-value {
+  color: #1B4332;
+  font-size: 1.6rem;
+  font-weight: 700;
+}
+
+.daily-graph-card h3 {
+  color: #1B4332;
+  margin: 0 0 18px 0;
+  font-size: 1.1rem;
+  font-weight: 600;
+}
+
+.daily-graph {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(64px, 1fr));
+  gap: 14px;
+  align-items: end;
+}
+
+.daily-graph-bar {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
+.daily-graph-value,
+.daily-graph-label {
+  color: #1B4332;
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.daily-graph-track {
+  width: 100%;
+  height: 220px;
+  background: #EEF2EC;
+  border-radius: 16px 16px 8px 8px;
+  display: flex;
+  align-items: flex-end;
+  padding: 8px;
+}
+
+.daily-graph-fill {
+  width: 100%;
+  border-radius: 12px 12px 6px 6px;
+  background: linear-gradient(180deg, #1B4332 0%, #10B981 100%);
+  transition: height 0.3s ease;
+}
