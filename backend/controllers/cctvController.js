@@ -2,6 +2,30 @@ const { PrismaClient } = require('@prisma/client');
 
 const prisma = new PrismaClient();
 
+const MIN_CAMERA_POOL = 14;
+
+const ensureMinimumCameraPool = async () => {
+  const currentCount = await prisma.cCTV.count();
+  if (currentCount >= MIN_CAMERA_POOL) {
+    return;
+  }
+
+  const toCreate = MIN_CAMERA_POOL - currentCount;
+  const createPayload = Array.from({ length: toCreate }).map((_, index) => {
+    const number = currentCount + index + 1;
+    const suffix = String(number).padStart(3, '0');
+    return {
+      name: `CCTV-${suffix}`,
+      location: `Zone ${number}`,
+      status: 'active',
+      ipAddress: `192.168.1.${99 + number}`,
+      floorId: null
+    };
+  });
+
+  await prisma.cCTV.createMany({ data: createPayload });
+};
+
 // Create CCTV
 const createCCTV = async (req, res) => {
   try {
@@ -42,6 +66,8 @@ const createCCTV = async (req, res) => {
 // Get all CCTVs
 const getAllCCTVs = async (req, res) => {
   try {
+    await ensureMinimumCameraPool();
+
     const cctvs = await prisma.cCTV.findMany({
       include: {
         floor: true

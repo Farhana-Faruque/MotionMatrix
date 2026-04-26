@@ -1,0 +1,188 @@
+ // This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// Enum for User Roles
+enum UserRole {
+  ADMIN
+  MANAGER
+  OWNER
+  FLOOR_MANAGER
+  WORKER
+}
+
+// User Model
+model User {
+  id                Int       @id @default(autoincrement())
+  name              String
+  workerId          String?   @unique
+  email             String    @unique
+  password          String
+  role              UserRole
+  department        String?   // Optional for OWNER role
+  phone             String?
+  nid               String?   @unique
+  gender            String?
+  joinDate          DateTime?
+  position          String?
+  assignedFloorId   Int?      // For FLOOR_MANAGER and other roles
+  status            String    @default("active")
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+
+  // Relations
+  sentMessages      Message[]     @relation("SentMessages")
+  receivedMessages  Message[]     @relation("ReceivedMessages")
+  overtimeRequests  OvertimeRequest[] @relation("WorkerOvertimeRequests")
+  floorManagerOvertimeRequests OvertimeRequest[] @relation("FloorManagerOvertimeRequests")
+  assignedFloor     Floor?        @relation(fields: [assignedFloorId], references: [id], onDelete: SetNull)
+  productionRecords ProductionRecord[] @relation("RecordedBy")
+
+  @@index([email])
+  @@index([role])
+  @@index([department])
+  @@index([assignedFloorId])
+}
+
+// Floor Model
+model Floor {
+  id        Int       @id @default(autoincrement())
+  name      String
+  level     Int
+  area      Int
+  status    String    @default("active")
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  // Relations
+  cctvs             CCTV[]
+  assignedUsers     User[]  // Users assigned to this floor
+  productionRecords ProductionRecord[]
+
+  @@index([status])
+}
+
+// CCTV Camera Model
+model CCTV {
+  id        Int       @id @default(autoincrement())
+  name      String
+  location  String
+  status    String    @default("active")
+  ipAddress String?
+  floorId   Int?
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  // Relations
+  floor     Floor?    @relation(fields: [floorId], references: [id], onDelete: SetNull)
+
+  @@index([floorId])
+  @@index([status])
+}
+
+// Message Model (Communication between users)
+model Message {
+  id        Int       @id @default(autoincrement())
+  fromId    Int
+  toId      Int
+  content   String
+  read      Boolean   @default(false)
+  createdAt DateTime  @default(now())
+
+  // Relations
+  from      User      @relation("SentMessages", fields: [fromId], references: [id], onDelete: Cascade)
+  to        User      @relation("ReceivedMessages", fields: [toId], references: [id], onDelete: Cascade)
+
+  @@index([fromId])
+  @@index([toId])
+  @@index([createdAt])
+}
+
+// Overtime Request Model
+model OvertimeRequest {
+  id              Int       @id @default(autoincrement())
+  workerId        Int
+  floorManagerId  Int
+  date            DateTime
+  hours           Int
+  reason          String
+  status          String    @default("pending") // pending, approved, rejected
+  submittedAt     DateTime  @default(now())
+  respondedAt     DateTime?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  // Relations
+  worker          User      @relation("WorkerOvertimeRequests", fields: [workerId], references: [id], onDelete: Cascade)
+  floorManager    User      @relation("FloorManagerOvertimeRequests", fields: [floorManagerId], references: [id], onDelete: Cascade)
+
+  @@index([workerId])
+  @@index([floorManagerId])
+  @@index([status])
+  @@index([date])
+}
+
+// Report Model
+model Report {
+  id        Int       @id @default(autoincrement())
+  title     String
+  department String
+  date      DateTime
+  period    String
+  data      Json      // Store JSON data for flexible reporting
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  @@index([department])
+  @@index([date])
+}
+
+// GraphData Model (for analytics)
+model GraphData {
+  id        Int       @id @default(autoincrement())
+  type      String    // production, attendance, efficiency
+  title     String
+  period    String
+  unit      String
+  data      Json      // Array of date/value pairs
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  @@index([type])
+}
+
+// ProductionRecord Model - Tracks production by shift (4 per day)
+model ProductionRecord {
+  id              Int       @id @default(autoincrement())
+  floorId         Int
+  date            DateTime
+  shift           Int       // 1-4 (Morning, Evening, Night, Late Night)
+  workersCount    Int
+  produced        Int       // Units produced
+  target          Int
+  qualityRate     Float?    // 0-100%
+  efficiency      Int?      // 0-100%
+  notes           String?
+  recordedBy      String    // User name who recorded
+  recordedById    Int?      // User ID
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  // Relations
+  floor           Floor?    @relation(fields: [floorId], references: [id], onDelete: Cascade)
+  recordedByUser  User?     @relation("RecordedBy", fields: [recordedById], references: [id], onDelete: SetNull)
+
+  @@index([floorId])
+  @@index([date])
+  @@index([shift])
+  @@index([recordedById])
+  @@unique([floorId, date, shift])
+}

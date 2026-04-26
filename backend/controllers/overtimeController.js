@@ -1,4 +1,5 @@
 const { PrismaClient } = require('@prisma/client');
+const { syncOvertimeAttendance } = require('./attendanceController');
 
 const prisma = new PrismaClient();
 
@@ -249,6 +250,13 @@ const approveOvertimeRequest = async (req, res) => {
       }
     });
 
+    await syncOvertimeAttendance({
+      workerId: overtimeRequest.workerId,
+      date: overtimeRequest.date,
+      overtimeHours: overtimeRequest.hours,
+      floorManagerId: overtimeRequest.floorManagerId
+    });
+
     res.json({
       success: true,
       message: 'Overtime request approved',
@@ -289,6 +297,13 @@ const rejectOvertimeRequest = async (req, res) => {
           select: { id: true, name: true, email: true }
         }
       }
+    });
+
+    await syncOvertimeAttendance({
+      workerId: overtimeRequest.workerId,
+      date: overtimeRequest.date,
+      overtimeHours: 0,
+      floorManagerId: overtimeRequest.floorManagerId
     });
 
     res.json({

@@ -695,6 +695,88 @@ const assignWorkerToFloor = async (req, res) => {
   }
 };
 
+// Remove worker from floor (make available)
+const unassignWorkerFromFloor = async (req, res) => {
+  try {
+    const { workerId } = req.params;
+    const requesterRole = req.user?.role;
+    const requesterFloorId = req.user?.assignedFloorId ? parseInt(req.user.assignedFloorId) : null;
+
+    const worker = await prisma.user.findUnique({
+      where: { id: parseInt(workerId) },
+      select: {
+        id: true,
+        role: true,
+        assignedFloorId: true,
+        name: true,
+        email: true,
+        department: true,
+        phone: true,
+        position: true,
+        workerId: true
+      }
+    });
+
+    if (!worker) {
+      return res.status(404).json({
+        success: false,
+        message: 'Worker not found'
+      });
+    }
+
+    if (worker.role !== 'WORKER') {
+      return res.status(400).json({
+        success: false,
+        message: 'Only workers can be unassigned from floors'
+      });
+    }
+
+    if (!worker.assignedFloorId) {
+      return res.status(400).json({
+        success: false,
+        message: 'Worker is already available'
+      });
+    }
+
+    // Floor managers can only remove workers from their own floor.
+    if (requesterRole === 'FLOOR_MANAGER' && worker.assignedFloorId !== requesterFloorId) {
+      return res.status(403).json({
+        success: false,
+        message: 'You can only remove workers assigned to your floor'
+      });
+    }
+
+    const updatedWorker = await prisma.user.update({
+      where: { id: parseInt(workerId) },
+      data: { assignedFloorId: null },
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        role: true,
+        department: true,
+        phone: true,
+        position: true,
+        workerId: true,
+        assignedFloorId: true
+      }
+    });
+
+    res.json({
+      success: true,
+      message: 'Worker moved to available workers successfully',
+      worker: updatedWorker
+    });
+  } catch (error) {
+    console.error('Unassign worker from floor error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to remove worker from floor',
+      error: error.message
+    });
+  }
+};
+
 module.exports = {
   createUser,
   getAllUsers,
@@ -707,5 +789,6 @@ module.exports = {
   getWorkersByFloor,
   getFloorManager,
   getUnassignedWorkers,
-  assignWorkerToFloor
+  assignWorkerToFloor,
+  unassignWorkerFromFloor
 };

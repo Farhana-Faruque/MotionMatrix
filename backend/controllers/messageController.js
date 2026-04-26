@@ -71,8 +71,12 @@ const sendMessage = async (req, res) => {
 
     console.log(`✅ Message SAVED to database (ID: ${message.id})`);
 
-    // NOTE: Socket emission is handled by the socket.io event handler in index.js
-    // This REST endpoint only saves the message, real-time delivery is via WebSocket
+    if (io) {
+      const roomName = `user_${toIdNum}`;
+      io.to(roomName).emit('receive_message', message);
+      io.to(`user_${parseInt(fromId)}`).emit('receive_message', message);
+      console.log(`📨 REST endpoint emitted message to ${roomName} and sender room`);
+    }
 
     console.log(`${'='.repeat(60)}\n`);
 
