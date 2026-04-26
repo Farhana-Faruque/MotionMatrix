@@ -12,8 +12,13 @@ const {
   getWorkersByFloor,
   getFloorManager,
   getUnassignedWorkers,
-  assignWorkerToFloor
+  assignWorkerToFloor,
+  unassignWorkerFromFloor
 } = require('../controllers/userController');
+const {
+  markAttendance,
+  getFloorAttendanceSummary
+} = require('../controllers/attendanceController');
 const { auth, authorize } = require('../middleware/auth');
 
 // Public routes (no auth required)
@@ -45,8 +50,15 @@ router.get('/floor/:floorId', getWorkersByFloor);
 // Get unassigned workers
 router.get('/workers/unassigned', getUnassignedWorkers);
 
+// Attendance routes (stable alias under mounted users router)
+router.post('/attendance/mark', authorize('FLOOR_MANAGER', 'ADMIN', 'OWNER'), markAttendance);
+router.get('/attendance/floor/:floorId/summary', authorize('FLOOR_MANAGER', 'ADMIN', 'OWNER'), getFloorAttendanceSummary);
+
 // Assign worker to floor
-router.put('/:workerId/assign-floor', assignWorkerToFloor);
+router.put('/:workerId/assign-floor', authorize('FLOOR_MANAGER', 'ADMIN', 'OWNER'), assignWorkerToFloor);
+
+// Remove worker from floor (move back to available workers)
+router.put('/:workerId/unassign-floor', authorize('FLOOR_MANAGER', 'ADMIN', 'OWNER'), unassignWorkerFromFloor);
 
 // Get user by ID
 router.get('/:id', getUserById);

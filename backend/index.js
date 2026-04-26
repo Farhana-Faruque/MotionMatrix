@@ -17,6 +17,8 @@ const io = socketIo(server, {
 });
 
 const prisma = new PrismaClient();
+const { markAttendance, getFloorAttendanceSummary } = require('./controllers/attendanceController');
+const { auth, authorize } = require('./middleware/auth');
 
 // Middleware
 app.use(cors());
@@ -35,6 +37,10 @@ app.use((req, res, next) => {
   next();
 });
 
+// Attendance compatibility routes for existing frontend calls
+app.post('/api/users/attendance/mark', auth, authorize('FLOOR_MANAGER', 'ADMIN', 'OWNER'), markAttendance);
+app.get('/api/users/attendance/floor/:floorId/summary', auth, authorize('FLOOR_MANAGER', 'ADMIN', 'OWNER'), getFloorAttendanceSummary);
+
 // Routes
 app.use('/api/auth', require('./routes/auth'));
 app.use('/api/users', require('./routes/users'));
@@ -42,6 +48,7 @@ app.use('/api/floors', require('./routes/floors'));
 app.use('/api/cctvs', require('./routes/cctvs'));
 app.use('/api/messages', require('./routes/messages'));
 app.use('/api/overtime', require('./routes/overtime'));
+app.use('/api/attendance', require('./routes/attendance'));
 app.use('/api/reports', require('./routes/reports'));
 app.use('/api/graphs', require('./routes/graphs'));
 app.use('/api/production-records', require('./routes/productionRecords'));
@@ -80,11 +87,11 @@ io.use((socket, next) => {
   
   try {
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    socket.userId = decoded.id;
+    socket.userId = parseInt(decoded.id) || decoded.id;
     socket.userRole = decoded.role;
-    socket.userFloor = decoded.assignedFloorId;
+    socket.userFloor = decoded.assignedFloorId ? parseInt(decoded.assignedFloorId) : null;
     socket.userName = decoded.name;
-    console.log(`🔐 WebSocket auth successful: userId=${decoded.id}, role=${decoded.role}, floor=${decoded.assignedFloorId}`);
+    console.log(`🔐 WebSocket auth successful: userId=${socket.userId}, role=${socket.userRole}, floor=${socket.userFloor}`);
     next();
   } catch (error) {
     console.error('❌ WebSocket auth error:', error);
@@ -167,9 +174,17 @@ io.on('connection', async (socket) => {
       console.log(`✅ Permission CHECK PASSED`);
 
       // Save message to database
+      // Ensure IDs are integers
+      const fromIdNum = parseInt(fromId);
+      if (isNaN(fromIdNum)) {
+        console.error('❌ Invalid fromId:', fromId);
+        socket.emit('error', { message: 'Invalid sender ID' });
+        return;
+      }
+
       const message = await prisma.message.create({
         data: {
-          fromId: fromId,
+          fromId: fromIdNum,
           toId: toIdNum,
           content
         },
@@ -187,7 +202,7 @@ io.on('connection', async (socket) => {
       io.to(roomName).emit('receive_message', message);
       console.log(`✅ Message EMITTED to recipient's room`);
       
-      // Also send to sender (for confirmation)
+      // Also send to sender (for confirmation/echo)
       socket.emit('receive_message', message);
       console.log(`✅ Message EMITTED to sender for confirmation`);
       console.log(`${'='.repeat(60)}\n`);
@@ -232,40 +247,50 @@ function checkMessagePermission(sender, receiver) {
 
   console.log(`🔐 Checking permission: ${sender.name} (${senderRole}, floor=${senderFloor}) -> ${receiver.name} (${receiverRole}, floor=${receiverFloor})`);
 
-  // FLOOR_MANAGER can message: WORKER (same floor), OWNER, MANAGER, ADMIN
-  if (senderRole === 'FLOOR_MANAGER') {
-    if (receiverRole === 'WORKER') {
-      const canMessage = receiverFloor === senderFloor;
-      console.log(`  Floor Manager -> Worker: ${canMessage ? '✅ ALLOWED' : '❌ DENIED'} (same floor check)`);
-      return canMessage;
-    }
-    const canMessage = ['OWNER', 'MANAGER', 'ADMIN'].includes(receiverRole);
-    console.log(`  Floor Manager -> ${receiverRole}: ${canMessage ? '✅ ALLOWED' : '❌ DENIED'}`);
-    return canMessage;
+  // ADMIN can message anyone
+  if (senderRole === 'ADMIN') {
+    console.log(`  Admin -> ${receiverRole}: ✅ ALLOWED`);
+    return true;
   }
 
-  // WORKER can only message their assigned FLOOR_MANAGER
-  if (senderRole === 'WORKER') {
-    const canMessage = receiverRole === 'FLOOR_MANAGER' && receiverFloor === senderFloor;
-    console.log(`  Worker -> Floor Manager: ${canMessage ? '✅ ALLOWED' : '❌ DENIED'} (same floor check)`);
-    return canMessage;
+  // Anyone can message ADMIN
+  if (receiverRole === 'ADMIN') {
+    console.log(`  ${senderRole} -> Admin: ✅ ALLOWED`);
+    return true;
   }
 
-  // OWNER and MANAGER can message: all FLOOR_MANAGERS, ADMIN
+  // OWNER and MANAGER can message: FLOOR_MANAGER, WORKER, and each other
   if (senderRole === 'OWNER' || senderRole === 'MANAGER') {
-    const canMessage = ['FLOOR_MANAGER', 'ADMIN'].includes(receiverRole);
+    const canMessage = ['FLOOR_MANAGER', 'WORKER', 'OWNER', 'MANAGER'].includes(receiverRole);
     console.log(`  ${senderRole} -> ${receiverRole}: ${canMessage ? '✅ ALLOWED' : '❌ DENIED'}`);
     return canMessage;
   }
 
-  // ADMIN can message: FLOOR_MANAGER, MANAGER, OWNER
-  if (senderRole === 'ADMIN') {
-    const canMessage = ['FLOOR_MANAGER', 'MANAGER', 'OWNER'].includes(receiverRole);
-    console.log(`  Admin -> ${receiverRole}: ${canMessage ? '✅ ALLOWED' : '❌ DENIED'}`);
+  // FLOOR_MANAGER can message: WORKER (same floor), OWNER, MANAGER
+  if (senderRole === 'FLOOR_MANAGER') {
+    if (receiverRole === 'WORKER') {
+      const canMessage = receiverFloor === senderFloor;
+      console.log(`  Floor Manager -> Worker: ${canMessage ? '✅ ALLOWED (same floor)' : '❌ DENIED (different floor)'}`);
+      return canMessage;
+    }
+    const canMessage = ['OWNER', 'MANAGER', 'FLOOR_MANAGER'].includes(receiverRole);
+    console.log(`  Floor Manager -> ${receiverRole}: ${canMessage ? '✅ ALLOWED' : '❌ DENIED'}`);
     return canMessage;
   }
 
-  console.warn(`⚠️ Unknown role: ${senderRole}`);
+  // WORKER can message: FLOOR_MANAGER (same floor), OWNER, MANAGER
+  if (senderRole === 'WORKER') {
+    if (receiverRole === 'FLOOR_MANAGER') {
+      const canMessage = receiverFloor === senderFloor;
+      console.log(`  Worker -> Floor Manager: ${canMessage ? '✅ ALLOWED (same floor)' : '❌ DENIED (different floor)'}`);
+      return canMessage;
+    }
+    const canMessage = ['OWNER', 'MANAGER'].includes(receiverRole);
+    console.log(`  Worker -> ${receiverRole}: ${canMessage ? '✅ ALLOWED' : '❌ DENIED'}`);
+    return canMessage;
+  }
+
+  console.warn(`⚠️ Unknown role or combination: ${senderRole} -> ${receiverRole}`);
   return false;
 }
 
