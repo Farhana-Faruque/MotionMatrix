@@ -11,6 +11,7 @@ const AdminDashboard = ({ onLogout, adminUser }) => {
   const [adminData, setAdminData] = useState(adminUser || {});
   const [allUsers, setAllUsers] = useState([]);
   const [workers, setWorkers] = useState([]);
+  const [floors, setFloors] = useState([]);
   const [stats, setStats] = useState({
     totalUsers: 0,
     totalWorkers: 0,
@@ -26,23 +27,36 @@ const AdminDashboard = ({ onLogout, adminUser }) => {
     }
   }, [adminUser]);
 
-  // Fetch all users
+  // Fetch all users and floors
   useEffect(() => {
-    const fetchUsers = async () => {
+    const fetchUsersAndFloors = async () => {
       try {
         setLoading(true);
         const token = localStorage.getItem('authToken');
         
-        const response = await fetch('http://localhost:5000/api/users', {
+        // Fetch users
+        const usersResponse = await fetch('http://localhost:5000/api/users', {
           headers: {
             'Authorization': `Bearer ${token}`
           }
         });
         
-        if (response.ok) {
-          const data = await response.json();
-          const users = data.users || [];
+        // Fetch floors
+        const floorsResponse = await fetch('http://localhost:5000/api/floors', {
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        });
+        
+        if (usersResponse.ok && floorsResponse.ok) {
+          const usersData = await usersResponse.json();
+          const floorsData = await floorsResponse.json();
+          
+          const users = usersData.users || [];
+          const floorsList = floorsData.floors || [];
+          
           setAllUsers(users);
+          setFloors(floorsList);
           
           // Calculate stats
           const stats = {
@@ -56,10 +70,10 @@ const AdminDashboard = ({ onLogout, adminUser }) => {
           // Filter workers
           setWorkers(users.filter(u => u.role === 'WORKER'));
         } else {
-          setError('Failed to fetch users');
+          setError('Failed to fetch data');
         }
       } catch (error) {
-        console.error('Error fetching users:', error);
+        console.error('Error fetching data:', error);
         setError('Error loading users');
       } finally {
         setLoading(false);
@@ -67,7 +81,7 @@ const AdminDashboard = ({ onLogout, adminUser }) => {
     };
 
     if (activeSection === 'dashboard' || activeSection === 'viewWorkers') {
-      fetchUsers();
+      fetchUsersAndFloors();
     }
   }, [activeSection]);
 
@@ -111,6 +125,13 @@ const AdminDashboard = ({ onLogout, adminUser }) => {
       default:
         return '#666';
     }
+  };
+
+  // Get floor level by floor ID
+  const getFloorLevel = (floorId) => {
+    if (!floorId) return '-';
+    const floor = floors.find(f => f.id === floorId);
+    return floor ? `Level ${floor.level}` : '-';
   };
 
   return (
@@ -353,7 +374,7 @@ const AdminDashboard = ({ onLogout, adminUser }) => {
                           <td>{user.department || '-'}</td>
                           <td>{user.phone || '-'}</td>
                           <td>{user.workerId || '-'}</td>
-                          <td>{user.assignedFloorId || '-'}</td>
+                          <td>{getFloorLevel(user.assignedFloorId)}</td>
                           <td>
                             <span className={`status-badge ${user.status?.toLowerCase()}`}>
                               {user.status || 'active'}
