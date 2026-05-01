@@ -1,4 +1,4 @@
-d# MotionMatrix Backend API
+# MotionMatrix Backend API
 
 A comprehensive Node.js/Express backend for factory management system with JWT authentication, PostgreSQL database, and Prisma ORM.
 
@@ -43,22 +43,12 @@ A comprehensive Node.js/Express backend for factory management system with JWT a
    npm install
    ```
 
-3. **Configure environment variables**
-   - Create/update `.env` file:
-   ```
-   DATABASE_URL="postgresql://postgres:postgresql@localhost:5432/motion_matrix"
-   JWT_SECRET="your_super_secret_jwt_key_change_this_in_production"
-   JWT_EXPIRE="7d"
-   NODE_ENV="development"
-   PORT=5000
-   ```
-
-4. **Push database schema**
+3. **Push database schema**
    ```bash
    npx prisma db push
    ```
 
-5. **Start the server**
+4. **Start the server**
    ```bash
    npm start
    ```
