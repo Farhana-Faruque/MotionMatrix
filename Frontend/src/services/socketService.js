@@ -1,12 +1,12 @@
 import { io } from 'socket.io-client';
 
 let socket = null;
-let listeners = new Map(); // Track registered listeners
+let listeners = new Map(); 
 
 const SocketService = {
   connect: (token) => {
     if (socket && socket.connected) {
-      console.log('🔄 Socket already connected, reusing...');
+      console.log(' Socket already connected, reusing...');
       return socket;
     }
 
@@ -23,15 +23,15 @@ const SocketService = {
     });
 
     socket.on('connect', () => {
-      console.log('✅ Connected to WebSocket server');
+      console.log(' Connected to WebSocket server');
     });
 
     socket.on('connect_error', (error) => {
-      console.error('❌ Connection error:', error);
+      console.error(' Connection error:', error);
     });
 
     socket.on('disconnect', () => {
-      console.log('❌ Disconnected from WebSocket server');
+      console.log(' Disconnected from WebSocket server');
     });
 
     return socket;
@@ -39,24 +39,23 @@ const SocketService = {
 
   disconnect: () => {
     if (socket) {
-      // Clear all tracked listeners
       listeners.forEach((_, eventName) => {
         socket.off(eventName);
       });
       listeners.clear();
       socket.disconnect();
       socket = null;
-      console.log('🔌 Socket disconnected and cleaned up');
+      console.log(' Socket disconnected and cleaned up');
     }
   },
 
   sendMessage: (toId, content) => {
     if (socket && socket.connected) {
       const toIdNum = parseInt(toId);
-      console.log(`📤 Emitting send_message to ${toIdNum}`, { toId: toIdNum, content: content.substring(0, 50) });
+      console.log(` Emitting send_message to ${toIdNum}`, { toId: toIdNum, content: content.substring(0, 50) });
       socket.emit('send_message', { toId: toIdNum, content });
     } else {
-      console.warn('⚠️ Socket not connected');
+      console.warn(' Socket not connected');
     }
   },
 
@@ -69,9 +68,9 @@ const SocketService = {
       // Register new listener
       socket.on('receive_message', callback);
       listeners.set('receive_message', callback);
-      console.log('📨 receive_message listener registered');
+      console.log(' receive_message listener registered');
     } else {
-      console.warn('⚠️ Socket not available');
+      console.warn(' Socket not available');
     }
   },
 
@@ -92,7 +91,7 @@ const SocketService = {
       }
       socket.on('error', callback);
       listeners.set('error', callback);
-      console.log('❌ error listener registered');
+      console.log(' error listener registered');
     }
   },
 
@@ -163,7 +162,7 @@ const SocketService = {
       }
     });
     listeners.clear();
-    console.log('🧹 All listeners removed');
+    console.log(' All listeners removed');
   },
 
   getSocket: () => socket
