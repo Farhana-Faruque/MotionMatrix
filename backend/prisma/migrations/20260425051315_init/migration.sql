@@ -1,7 +1,5 @@
--- CreateEnum
 CREATE TYPE "UserRole" AS ENUM ('ADMIN', 'MANAGER', 'OWNER', 'FLOOR_MANAGER', 'WORKER');
 
--- CreateTable
 CREATE TABLE "User" (
     "id" SERIAL NOT NULL,
     "name" TEXT NOT NULL,
@@ -23,7 +21,6 @@ CREATE TABLE "User" (
     CONSTRAINT "User_pkey" PRIMARY KEY ("id")
 );
 
--- CreateTable
 CREATE TABLE "Floor" (
     "id" SERIAL NOT NULL,
     "name" TEXT NOT NULL,
@@ -36,7 +33,6 @@ CREATE TABLE "Floor" (
     CONSTRAINT "Floor_pkey" PRIMARY KEY ("id")
 );
 
--- CreateTable
 CREATE TABLE "CCTV" (
     "id" SERIAL NOT NULL,
     "name" TEXT NOT NULL,
@@ -50,7 +46,6 @@ CREATE TABLE "CCTV" (
     CONSTRAINT "CCTV_pkey" PRIMARY KEY ("id")
 );
 
--- CreateTable
 CREATE TABLE "Message" (
     "id" SERIAL NOT NULL,
     "fromId" INTEGER NOT NULL,
@@ -62,7 +57,6 @@ CREATE TABLE "Message" (
     CONSTRAINT "Message_pkey" PRIMARY KEY ("id")
 );
 
--- CreateTable
 CREATE TABLE "OvertimeRequest" (
     "id" SERIAL NOT NULL,
     "workerId" INTEGER NOT NULL,
@@ -79,7 +73,6 @@ CREATE TABLE "OvertimeRequest" (
     CONSTRAINT "OvertimeRequest_pkey" PRIMARY KEY ("id")
 );
 
--- CreateTable
 CREATE TABLE "Report" (
     "id" SERIAL NOT NULL,
     "title" TEXT NOT NULL,
@@ -93,7 +86,6 @@ CREATE TABLE "Report" (
     CONSTRAINT "Report_pkey" PRIMARY KEY ("id")
 );
 
--- CreateTable
 CREATE TABLE "GraphData" (
     "id" SERIAL NOT NULL,
     "type" TEXT NOT NULL,
@@ -107,7 +99,6 @@ CREATE TABLE "GraphData" (
     CONSTRAINT "GraphData_pkey" PRIMARY KEY ("id")
 );
 
--- CreateTable
 CREATE TABLE "ProductionRecord" (
     "id" SERIAL NOT NULL,
     "floorId" INTEGER NOT NULL,
@@ -127,22 +118,16 @@ CREATE TABLE "ProductionRecord" (
     CONSTRAINT "ProductionRecord_pkey" PRIMARY KEY ("id")
 );
 
--- CreateIndex
 CREATE UNIQUE INDEX "User_workerId_key" ON "User"("workerId");
 
--- CreateIndex
 CREATE UNIQUE INDEX "User_email_key" ON "User"("email");
 
--- CreateIndex
 CREATE UNIQUE INDEX "User_nid_key" ON "User"("nid");
 
--- CreateIndex
 CREATE INDEX "User_email_idx" ON "User"("email");
 
--- CreateIndex
 CREATE INDEX "User_role_idx" ON "User"("role");
 
--- CreateIndex
 CREATE INDEX "User_department_idx" ON "User"("department");
 
 -- CreateIndex
@@ -190,16 +175,12 @@ CREATE INDEX "GraphData_type_idx" ON "GraphData"("type");
 -- CreateIndex
 CREATE INDEX "ProductionRecord_floorId_idx" ON "ProductionRecord"("floorId");
 
--- CreateIndex
 CREATE INDEX "ProductionRecord_date_idx" ON "ProductionRecord"("date");
 
--- CreateIndex
 CREATE INDEX "ProductionRecord_shift_idx" ON "ProductionRecord"("shift");
 
--- CreateIndex
 CREATE INDEX "ProductionRecord_recordedById_idx" ON "ProductionRecord"("recordedById");
 
--- CreateIndex
 CREATE UNIQUE INDEX "ProductionRecord_floorId_date_shift_key" ON "ProductionRecord"("floorId", "date", "shift");
 
 -- AddForeignKey

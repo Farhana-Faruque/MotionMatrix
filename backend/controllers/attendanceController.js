@@ -1,258 +1,248 @@
-const bcrypt = require('bcryptjs');
-const jwt = require('jsonwebtoken');
 const { PrismaClient } = require('@prisma/client');
 
 const prisma = new PrismaClient();
 
-// Register
-const register = async (req, res) => {
-  try {
-    const { name, email, password, confirmPassword, role, department, phone, nid, gender, joinDate, position, workerId, assignedFloorId } = req.body;
+const REGULAR_DAY_HOURS = 8;
 
-    console.log('📝 Register attempt with data:', { name, email, role, department, phone });
+const toDateKey = (dateValue) => new Date(dateValue).toISOString().slice(0, 10);
 
-    // Normalize role to uppercase
-    const roleUpper = role ? role.toUpperCase() : '';
+const getDayRange = (dateValue) => {
+  const start = new Date(dateValue);
+  start.setHours(0, 0, 0, 0);
 
-    // Validation - provide specific error messages
-    if (!name || !name.trim()) {
-      return res.status(400).json({
-        success: false,
-        message: 'Full name is required'
-      });
+  const end = new Date(dateValue);
+  end.setHours(23, 59, 59, 999);
+
+  return { start, end };
+};
+
+const getAttendanceTitle = (workerId, dateValue) => `attendance-${workerId}-${toDateKey(dateValue)}`;
+
+const getApprovedOvertimeHours = async (workerId, dateValue) => {
+  const { start, end } = getDayRange(dateValue);
+
+  const overtimeRequests = await prisma.overtimeRequest.findMany({
+    where: {
+      workerId: parseInt(workerId),
+      date: {
+        gte: start,
+        lte: end
+      },
+      status: 'approved'
+    },
+    select: {
+      hours: true
     }
-    
-    if (!email || !email.trim()) {
-      return res.status(400).json({
-        success: false,
-        message: 'Email is required'
-      });
-    }
-    
-    if (!phone || !phone.trim()) {
-      return res.status(400).json({
-        success: false,
-        message: 'Phone number is required'
-      });
-    }
-    
-    if (!password) {
-      return res.status(400).json({
-        success: false,
-        message: 'Password is required'
-      });
-    }
-    
-    if (!roleUpper) {
-      return res.status(400).json({
-        success: false,
-        message: 'Role is required'
-      });
-    }
+  });
 
-    // Department is not required for OWNER role
-    if (roleUpper !== 'OWNER' && (!department || !department.trim())) {
-      return res.status(400).json({
-        success: false,
-        message: 'Department is required for this role'
-      });
+  return overtimeRequests.reduce((total, request) => total + (parseInt(request.hours) || 0), 0);
+};
+
+const buildAttendancePayload = async ({ worker, floorManager, status, dateValue, notes }) => {
+  const overtimeHours = await getApprovedOvertimeHours(worker.id, dateValue);
+  const regularHours = status === 'present' ? REGULAR_DAY_HOURS : 0;
+  const totalHours = regularHours + overtimeHours;
+
+  return {
+    title: getAttendanceTitle(worker.id, dateValue),
+    type: 'attendance',
+    period: toDateKey(dateValue),
+    unit: 'hours',
+    data: {
+      workerId: worker.id,
+      workerName: worker.name,
+      floorId: worker.assignedFloorId,
+      floorManagerId: floorManager?.id || null,
+      floorManagerName: floorManager?.name || null,
+      date: new Date(dateValue).toISOString(),
+      status,
+      regularHours,
+      overtimeHours,
+      totalHours,
+      notes: notes || null,
+      updatedAt: new Date().toISOString()
     }
+  };
+};
 
-    // Validate floor assignment is required for WORKER and FLOOR_MANAGER
-    if (['WORKER', 'FLOOR_MANAGER'].includes(roleUpper) && !assignedFloorId) {
-      return res.status(400).json({
-        success: false,
-        message: `Assigned floor is required for ${roleUpper} role`
-      });
-    }
+const upsertAttendanceRecord = async ({ worker, floorManager, status, dateValue, notes }) => {
+  const payload = await buildAttendancePayload({ worker, floorManager, status, dateValue, notes });
 
-    if (password !== confirmPassword) {
-      return res.status(400).json({
-        success: false,
-        message: 'Passwords do not match'
-      });
-    }
+  const existingRecord = await prisma.graphData.findFirst({
+    where: { type: 'attendance', title: payload.title }
+  });
 
-    // Check if user exists
-    const existingUser = await prisma.user.findUnique({
-      where: { email }
-    });
-
-    if (existingUser) {
-      return res.status(400).json({
-        success: false,
-        message: 'User already exists'
-      });
-    }
-
-    // Validate floor exists if assigning
-    if (assignedFloorId) {
-      const floor = await prisma.floor.findUnique({
-        where: { id: parseInt(assignedFloorId) }
-      });
-
-      if (!floor) {
-        return res.status(400).json({
-          success: false,
-          message: 'Assigned floor does not exist'
-        });
-      }
-    }
-
-    // Hash password
-    const hashedPassword = await bcrypt.hash(password, 10);
-
-    // Create user
-    const user = await prisma.user.create({
+  if (existingRecord) {
+    return prisma.graphData.update({
+      where: { id: existingRecord.id },
       data: {
-        name,
-        email,
-        password: hashedPassword,
-        role: roleUpper,
-        department: department || null,
-        phone,
-        nid,
-        gender,
-        joinDate: joinDate ? new Date(joinDate) : new Date(),
-        position,
-        workerId,
-        assignedFloorId: assignedFloorId ? parseInt(assignedFloorId) : null
+        period: payload.period,
+        unit: payload.unit,
+        data: payload.data
       }
     });
+  }
 
-    // Generate token
-    const token = jwt.sign(
-      { 
-        id: user.id, 
-        email: user.email, 
-        role: user.role,
-        name: user.name,
-        assignedFloorId: user.assignedFloorId
-      },
-      process.env.JWT_SECRET,
-      { expiresIn: process.env.JWT_EXPIRE }
-    );
+  return prisma.graphData.create({
+    data: payload
+  });
+};
 
-    res.status(201).json({
-      success: true,
-      message: 'User registered successfully',
-      user: {
-        id: user.id,
-        name: user.name,
-        email: user.email,
-        role: user.role,
-        department: user.department,
-        phone: user.phone,
-        assignedFloorId: user.assignedFloorId
-      },
-      token
-    });
-  } catch (error) {
-    console.error('Register error:', error);
-    
-    // Handle Prisma unique constraint errors
-    if (error.code === 'P2002') {
-      const field = error.meta?.target?.[0] || 'field';
-      const fieldName = field === 'email' ? 'Email' : 
-                       field === 'nid' ? 'NID' :
-                       field === 'workerId' ? 'Worker ID' : field;
+const markAttendance = async (req, res) => {
+  try {
+    const { workerId, status, date, notes } = req.body;
+    const currentUser = req.user;
+
+    if (!workerId || !status) {
       return res.status(400).json({
         success: false,
-        message: `${fieldName} already exists. Please use a different ${fieldName.toLowerCase()}.`
+        message: 'Worker and status are required'
       });
     }
-    
-    console.error('Detailed register error:', {
-      code: error.code,
-      message: error.message,
-      meta: error.meta
+
+    const normalizedStatus = String(status).toLowerCase();
+    if (!['present', 'absent'].includes(normalizedStatus)) {
+      return res.status(400).json({
+        success: false,
+        message: 'Status must be present or absent'
+      });
+    }
+
+    const worker = await prisma.user.findUnique({
+      where: { id: parseInt(workerId) },
+      select: { id: true, name: true, role: true, assignedFloorId: true, department: true }
     });
-    
-    res.status(500).json({
+
+    if (!worker || worker.role !== 'WORKER') {
+      return res.status(404).json({
+        success: false,
+        message: 'Worker not found'
+      });
+    }
+
+    if (currentUser.role === 'FLOOR_MANAGER' && worker.assignedFloorId !== currentUser.assignedFloorId) {
+      return res.status(403).json({
+        success: false,
+        message: 'You can only mark workers on your floor'
+      });
+    }
+
+    const floorManager = currentUser.role === 'FLOOR_MANAGER'
+      ? await prisma.user.findUnique({
+          where: { id: parseInt(currentUser.id) },
+          select: { id: true, name: true, assignedFloorId: true, role: true }
+        })
+      : null;
+
+    const attendance = await upsertAttendanceRecord({
+      worker,
+      floorManager,
+      status: normalizedStatus,
+      dateValue: date || new Date(),
+      notes
+    });
+
+    return res.status(201).json({
+      success: true,
+      message: 'Attendance saved successfully',
+      attendance
+    });
+  } catch (error) {
+    console.error('Mark attendance error:', error);
+    return res.status(500).json({
       success: false,
-      message: error.message || 'Registration failed',
+      message: 'Failed to save attendance',
       error: error.message
     });
   }
 };
 
-// Login
-const login = async (req, res) => {
-  try {
-    const { email, password } = req.body;
+const syncOvertimeAttendance = async ({ workerId, date, overtimeHours, floorManagerId }) => {
+  const worker = await prisma.user.findUnique({
+    where: { id: parseInt(workerId) },
+    select: { id: true, name: true, role: true, assignedFloorId: true }
+  });
 
-    // Validation
-    if (!email || !password) {
-      return res.status(400).json({
-        success: false,
-        message: 'Email and password are required'
-      });
-    }
-
-    // Find user
-    const user = await prisma.user.findUnique({
-      where: { email }
-    });
-
-    if (!user) {
-      return res.status(401).json({
-        success: false,
-        message: 'Invalid email or password'
-      });
-    }
-
-    // Check password
-    const isPasswordValid = await bcrypt.compare(password, user.password);
-
-    if (!isPasswordValid) {
-      return res.status(401).json({
-        success: false,
-        message: 'Invalid email or password'
-      });
-    }
-
-    // Generate token
-    const token = jwt.sign(
-      { 
-        id: user.id, 
-        email: user.email, 
-        role: user.role,
-        name: user.name,
-        assignedFloorId: user.assignedFloorId
-      },
-      process.env.JWT_SECRET,
-      { expiresIn: process.env.JWT_EXPIRE }
-    );
-
-    res.json({
-      success: true,
-      message: 'Login successful',
-      user: {
-        id: user.id,
-        name: user.name,
-        email: user.email,
-        role: user.role,
-        department: user.department,
-        phone: user.phone,
-        assignedFloorId: user.assignedFloorId
-      },
-      token
-    });
-  } catch (error) {
-    console.error('Login error:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Login failed',
-      error: error.message
-    });
+  if (!worker || worker.role !== 'WORKER') {
+    return null;
   }
+
+  const floorManager = floorManagerId
+    ? await prisma.user.findUnique({
+        where: { id: parseInt(floorManagerId) },
+        select: { id: true, name: true, assignedFloorId: true, role: true }
+      })
+    : null;
+
+  const existingAttendance = await prisma.graphData.findFirst({
+    where: {
+      type: 'attendance',
+      title: getAttendanceTitle(worker.id, date)
+    }
+  });
+
+  const baseData = existingAttendance?.data && typeof existingAttendance.data === 'object'
+    ? existingAttendance.data
+    : {
+        workerId: worker.id,
+        workerName: worker.name,
+        floorId: worker.assignedFloorId,
+        date: new Date(date).toISOString(),
+        status: 'present',
+        regularHours: REGULAR_DAY_HOURS,
+        overtimeHours: 0,
+        totalHours: REGULAR_DAY_HOURS
+      };
+
+  const updatedData = {
+    ...baseData,
+    workerId: worker.id,
+    workerName: worker.name,
+    floorId: worker.assignedFloorId,
+    floorManagerId: floorManager?.id || baseData.floorManagerId || null,
+    floorManagerName: floorManager?.name || baseData.floorManagerName || null,
+    date: new Date(date).toISOString(),
+    overtimeHours: parseInt(overtimeHours) || 0,
+    totalHours: (parseInt(baseData.regularHours) || 0) + (parseInt(overtimeHours) || 0),
+    updatedAt: new Date().toISOString()
+  };
+
+  if (existingAttendance) {
+    await prisma.graphData.update({
+      where: { id: existingAttendance.id },
+      data: {
+        period: toDateKey(date),
+        unit: 'hours',
+        data: updatedData
+      }
+    });
+    return updatedData;
+  }
+
+  await prisma.graphData.create({
+    data: {
+      title: getAttendanceTitle(worker.id, date),
+      type: 'attendance',
+      period: toDateKey(date),
+      unit: 'hours',
+      data: updatedData
+    }
+  });
+
+  return updatedData;
 };
 
-// Get current user
-const getCurrentUser = async (req, res) => {
+const getFloorAttendanceSummary = async (req, res) => {
   try {
-    const user = await prisma.user.findUnique({
-      where: { id: req.user.id },
+    const { floorId } = req.params;
+    const requestedDate = req.query.date ? new Date(req.query.date) : new Date();
+    const dateKey = toDateKey(requestedDate);
+
+    const workers = await prisma.user.findMany({
+      where: {
+        assignedFloorId: parseInt(floorId),
+        role: 'WORKER'
+      },
       select: {
         id: true,
         name: true,
@@ -260,165 +250,133 @@ const getCurrentUser = async (req, res) => {
         role: true,
         department: true,
         phone: true,
-        nid: true,
-        gender: true,
-        joinDate: true,
         position: true,
         workerId: true,
-        status: true,
-        assignedFloorId: true,
-        createdAt: true
+        assignedFloorId: true
       }
     });
 
-    if (!user) {
-      return res.status(404).json({
-        success: false,
-        message: 'User not found'
+    const attendanceRecords = await prisma.graphData.findMany({
+      where: {
+        type: 'attendance',
+        data: {
+          path: ['floorId'],
+          equals: parseInt(floorId)
+        }
+      },
+      orderBy: { updatedAt: 'desc' }
+    });
+
+    const recordsByWorker = new Map();
+    attendanceRecords.forEach((record) => {
+      const recordData = record.data && typeof record.data === 'object' ? record.data : null;
+      if (!recordData) return;
+      if (toDateKey(recordData.date) !== dateKey) return;
+      if (!recordsByWorker.has(recordData.workerId)) {
+        recordsByWorker.set(recordData.workerId, recordData);
+      }
+    });
+
+    const workersWithAttendance = await Promise.all(workers.map(async (worker) => {
+      const attendance = recordsByWorker.get(worker.id) || null;
+      const weekStart = new Date(requestedDate);
+      weekStart.setDate(weekStart.getDate() - 6);
+      weekStart.setHours(0, 0, 0, 0);
+
+      const weeklyRecords = await prisma.graphData.findMany({
+        where: {
+          type: 'attendance',
+          data: {
+            path: ['workerId'],
+            equals: worker.id
+          },
+          updatedAt: {
+            gte: weekStart
+          }
+        }
+      });
+
+      const weekTotalHours = weeklyRecords.reduce((sum, record) => {
+        const recordData = record.data && typeof record.data === 'object' ? record.data : null;
+        return sum + (parseInt(recordData?.totalHours) || 0);
+      }, 0);
+
+      return {
+        ...worker,
+        attendance: attendance || {
+          status: 'absent',
+          regularHours: 0,
+          overtimeHours: 0,
+          totalHours: 0,
+          date: requestedDate.toISOString()
+        },
+        todayHours: parseInt(attendance?.totalHours) || 0,
+        weekTotalHours
+      };
+    }));
+
+    const graphStart = new Date(requestedDate);
+    graphStart.setDate(graphStart.getDate() - 6);
+    graphStart.setHours(0, 0, 0, 0);
+
+    const graphRecords = await prisma.graphData.findMany({
+      where: {
+        type: 'attendance',
+        data: {
+          path: ['floorId'],
+          equals: parseInt(floorId)
+        },
+        updatedAt: {
+          gte: graphStart
+        }
+      }
+    });
+
+    const totalsByDate = new Map();
+    graphRecords.forEach((record) => {
+      const recordData = record.data && typeof record.data === 'object' ? record.data : null;
+      if (!recordData) return;
+      const key = toDateKey(recordData.date);
+      totalsByDate.set(key, (totalsByDate.get(key) || 0) + (parseInt(recordData.totalHours) || 0));
+    });
+
+    const dailyGraph = [];
+    for (let index = 0; index < 7; index += 1) {
+      const currentDate = new Date(graphStart);
+      currentDate.setDate(graphStart.getDate() + index);
+      const key = toDateKey(currentDate);
+      dailyGraph.push({
+        date: key,
+        label: currentDate.toLocaleDateString('en-US', { weekday: 'short' }),
+        totalHours: totalsByDate.get(key) || 0
       });
     }
 
-    res.json({
+    return res.json({
       success: true,
-      user
+      date: dateKey,
+      workers: workersWithAttendance,
+      dailyGraph,
+      totals: {
+        present: workersWithAttendance.filter(worker => worker.attendance?.status === 'present').length,
+        absent: workersWithAttendance.filter(worker => worker.attendance?.status === 'absent').length,
+        totalHours: workersWithAttendance.reduce((sum, worker) => sum + (parseInt(worker.todayHours) || 0), 0)
+      }
     });
   } catch (error) {
-    console.error('Get current user error:', error);
-    res.status(500).json({
+    console.error('Get floor attendance summary error:', error);
+    return res.status(500).json({
       success: false,
-      message: 'Failed to fetch user',
-      error: error.message
-    });
-  }
-};
-
-// Reset Password
-const resetPassword = async (req, res) => {
-  try {
-    const { email, newPassword } = req.body;
-
-    // Validation
-    if (!email || !newPassword) {
-      return res.status(400).json({
-        success: false,
-        message: 'Email and new password are required'
-      });
-    }
-
-    if (newPassword.length < 6) {
-      return res.status(400).json({
-        success: false,
-        message: 'Password must be at least 6 characters'
-      });
-    }
-
-    // Find user by email
-    const user = await prisma.user.findUnique({
-      where: { email }
-    });
-
-    if (!user) {
-      return res.status(404).json({
-        success: false,
-        message: 'User not found'
-      });
-    }
-
-    // Hash new password
-    const hashedPassword = await bcrypt.hash(newPassword, 10);
-
-    // Update user password
-    await prisma.user.update({
-      where: { id: user.id },
-      data: { password: hashedPassword }
-    });
-
-    res.json({
-      success: true,
-      message: 'Password reset successfully'
-    });
-  } catch (error) {
-    console.error('Reset password error:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Failed to reset password',
-      error: error.message
-    });
-  }
-};
-
-// Change password (requires current password verification)
-const changePassword = async (req, res) => {
-  try {
-    const { currentPassword, newPassword } = req.body;
-    const userId = req.user.id;
-
-    console.log('🔐 Change password request for user:', userId);
-
-    if (!currentPassword || !newPassword) {
-      return res.status(400).json({
-        success: false,
-        message: 'Current password and new password are required'
-      });
-    }
-
-    if (newPassword.length < 6) {
-      return res.status(400).json({
-        success: false,
-        message: 'New password must be at least 6 characters'
-      });
-    }
-
-    // Get user from database
-    const user = await prisma.user.findUnique({
-      where: { id: userId }
-    });
-
-    if (!user) {
-      return res.status(404).json({
-        success: false,
-        message: 'User not found'
-      });
-    }
-
-    // Verify current password
-    const isPasswordValid = await bcrypt.compare(currentPassword, user.password);
-    if (!isPasswordValid) {
-      return res.status(401).json({
-        success: false,
-        message: 'Current password is incorrect'
-      });
-    }
-
-    // Hash new password
-    const hashedPassword = await bcrypt.hash(newPassword, 10);
-
-    // Update password in database
-    const updatedUser = await prisma.user.update({
-      where: { id: userId },
-      data: { password: hashedPassword }
-    });
-
-    console.log('✅ Password changed successfully for user:', userId);
-
-    res.json({
-      success: true,
-      message: 'Password changed successfully'
-    });
-  } catch (error) {
-    console.error('Change password error:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Failed to change password',
+      message: 'Failed to fetch attendance summary',
       error: error.message
     });
   }
 };
 
 module.exports = {
-  register,
-  login,
-  getCurrentUser,
-  resetPassword,
-  changePassword
+  REGULAR_DAY_HOURS,
+  markAttendance,
+  getFloorAttendanceSummary,
+  syncOvertimeAttendance,
+  upsertAttendanceRecord
 };

@@ -91,16 +91,16 @@ io.use((socket, next) => {
     socket.userRole = decoded.role;
     socket.userFloor = decoded.assignedFloorId ? parseInt(decoded.assignedFloorId) : null;
     socket.userName = decoded.name;
-    console.log(`🔐 WebSocket auth successful: userId=${socket.userId}, role=${socket.userRole}, floor=${socket.userFloor}`);
+    console.log(` WebSocket auth successful: userId=${socket.userId}, role=${socket.userRole}, floor=${socket.userFloor}`);
     next();
   } catch (error) {
-    console.error('❌ WebSocket auth error:', error);
+    console.error(' WebSocket auth error:', error);
     next(new Error('Invalid token'));
   }
 });
 
 io.on('connection', async (socket) => {
-  console.log(`✅ User ${socket.userId} (${socket.userRole}, floor=${socket.userFloor}) connected via WebSocket`);
+  console.log(` User ${socket.userId} (${socket.userRole}, floor=${socket.userFloor}) connected via WebSocket`);
   activeUsers.set(socket.userId, { socketId: socket.id, role: socket.userRole, floor: socket.userFloor });
 
   // Join user to their own room
@@ -116,13 +116,13 @@ io.on('connection', async (socket) => {
       const fromId = socket.userId;
 
       console.log(`\n${'='.repeat(60)}`);
-      console.log(`📤 SOCKET MESSAGE RECEIVED`);
+      console.log(` SOCKET MESSAGE RECEIVED`);
       console.log(`Sender: ${socket.userName} (ID: ${fromId}, Role: ${socket.userRole})`);
       console.log(`Recipient ID: ${toId} (Type: ${typeof toId})`);
       console.log(`Content: "${content?.substring(0, 50)}..."`);
 
       if (!toId || !content) {
-        console.warn('⚠️ Missing toId or content', { toId, content });
+        console.warn(' Missing toId or content', { toId, content });
         socket.emit('error', { message: 'Missing toId or content' });
         return;
       }
@@ -130,7 +130,7 @@ io.on('connection', async (socket) => {
       // Ensure toId is a number
       const toIdNum = parseInt(toId);
       if (isNaN(toIdNum)) {
-        console.error('❌ Invalid toId:', toId);
+        console.error(' Invalid toId:', toId);
         socket.emit('error', { message: 'Invalid recipient ID' });
         return;
       }
@@ -155,7 +155,7 @@ io.on('connection', async (socket) => {
       });
 
       if (!receiver) {
-        console.error('❌ Receiver not found:', toIdNum);
+        console.error(' Receiver not found:', toIdNum);
         socket.emit('error', { message: 'Recipient not found' });
         return;
       }
@@ -165,19 +165,19 @@ io.on('connection', async (socket) => {
       // Check if message is allowed based on roles and floors
       const isAllowed = checkMessagePermission(sender, receiver);
       if (!isAllowed) {
-        console.warn(`❌ Permission DENIED`);
+        console.warn(` Permission DENIED`);
         socket.emit('error', { message: 'You cannot message this user' });
         console.log(`${'='.repeat(60)}\n`);
         return;
       }
 
-      console.log(`✅ Permission CHECK PASSED`);
+      console.log(` Permission CHECK PASSED`);
 
       // Save message to database
       // Ensure IDs are integers
       const fromIdNum = parseInt(fromId);
       if (isNaN(fromIdNum)) {
-        console.error('❌ Invalid fromId:', fromId);
+        console.error(' Invalid fromId:', fromId);
         socket.emit('error', { message: 'Invalid sender ID' });
         return;
       }
@@ -194,13 +194,13 @@ io.on('connection', async (socket) => {
         }
       });
 
-      console.log(`✅ Message SAVED to database (ID: ${message.id})`);
+      console.log(` Message SAVED to database (ID: ${message.id})`);
 
       // Send message to recipient
       const roomName = `user_${toIdNum}`;
-      console.log(`📨 Emitting message to room: ${roomName}`);
+      console.log(` Emitting message to room: ${roomName}`);
       io.to(roomName).emit('receive_message', message);
-      console.log(`✅ Message EMITTED to recipient's room`);
+      console.log(` Message EMITTED to recipient's room`);
       
       // Also send to sender (for confirmation/echo)
       socket.emit('receive_message', message);
